@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trétr'aide — Informatique</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1D9E75; --green-bg: #E1F5EE; --green-dark: #085041;
+    --amber: #BA7517; --amber-bg: #FAEEDA; --amber-dark: #633806;
+    --red: #A32D2D; --red-bg: #FCEBEB; --red-dark: #501313;
+    --blue: #185FA5; --blue-bg: #E6F1FB; --blue-dark: #042C53;
+    --gray: #888780; --border: #e2e0d8; --text: #1a1a18; --muted: #6b6a65;
+    --bg: #ffffff; --bg2: #f7f6f1; --radius: 10px; --radius-sm: 6px;
+  }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg2); color: var(--text); min-height: 100vh; }
+  .container { max-width: 640px; margin: 0 auto; padding: 1.5rem 1rem; }
+  .view { display: none; }
+  .view.active { display: block; }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 1.5rem; }
+  .card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+
+  .year-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 8px 2px; }
+  .class-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .class-grid.single { grid-template-columns: 1fr; }
+  .class-btn { padding: 1.25rem 1rem; border-radius: var(--radius); border: 1.5px solid var(--border); background: var(--bg); cursor: pointer; text-align: center; transition: all 0.15s; user-select: none; }
+  .class-btn:hover { border-color: var(--blue); }
+  .class-btn:active { transform: scale(0.97); }
+  .cls-name { font-size: 22px; font-weight: 700; color: var(--text); }
+  .cls-count { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .step-indicator { display: flex; align-items: center; gap: 6px; margin-bottom: 1.5rem; }
+  .step { width: 24px; height: 24px; border-radius: 50%; font-size: 11px; font-weight: 600; border: 1.5px solid var(--border); color: var(--muted); background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step.done { background: var(--green); border-color: var(--green); color: white; }
+  .step.active { background: var(--text); border-color: var(--text); color: var(--bg); }
+  .step-line { flex: 1; height: 1px; background: var(--border); }
+  .step-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  .back-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); cursor: pointer; margin-bottom: 1.25rem; }
+  .back-btn:hover { color: var(--text); }
+
+  /* Grille des noms */
+  .names-label { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .names-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .name-btn { padding: 10px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg2); cursor: pointer; text-align: left; font-size: 13px; font-weight: 500; color: var(--text); transition: all 0.15s; user-select: none; line-height: 1.3; }
+  .name-btn:hover { border-color: var(--blue); background: var(--blue-bg); color: var(--blue-dark); }
+  .name-btn:active { transform: scale(0.97); }
+  .name-btn.sel { background: var(--blue-bg); border-color: var(--blue); color: var(--blue-dark); font-weight: 600; }
+
+  .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1.25rem; }
+  .status-btn { padding: 1rem; border-radius: var(--radius); border: 1.5px solid var(--border); background: var(--bg); cursor: pointer; text-align: center; transition: all 0.15s; user-select: none; }
+  .status-btn:active { transform: scale(0.97); }
+  .btn-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+  .btn-label { font-size: 13px; font-weight: 600; }
+  .btn-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .btn-ok .btn-label { color: var(--green-dark); }
+  .btn-wait .btn-label { color: var(--amber-dark); }
+  .btn-help .btn-label { color: var(--red-dark); }
+  .btn-expert .btn-label { color: var(--blue-dark); }
+  .btn-ok.sel { background: var(--green-bg); border-color: var(--green); }
+  .btn-wait.sel { background: var(--amber-bg); border-color: var(--amber); }
+  .btn-help.sel { background: var(--red-bg); border-color: var(--red); }
+  .btn-expert.sel { background: var(--blue-bg); border-color: var(--blue); }
+
+  .status-bar { margin-top: 1rem; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--bg2); border: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+  .status-bar.active { color: var(--text); font-weight: 500; }
+
+  .switch-row { margin-top: 1.25rem; }
+  .link-btn { font-size: 13px; color: var(--muted); cursor: pointer; text-decoration: underline; }
+  .link-btn:hover { color: var(--text); }
+
+  /* Vue prof */
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .tab { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; cursor: pointer; background: var(--bg); color: var(--muted); }
+  .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 500; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.25rem; }
+  .stat { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 8px; text-align: center; }
+  .stat-n { font-size: 20px; font-weight: 600; }
+  .stat-l { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .s-ok .stat-n { color: var(--green); }
+  .s-wait .stat-n { color: var(--amber); }
+  .s-help .stat-n { color: var(--red); }
+  .s-expert .stat-n { color: var(--blue); }
+  .section-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .help-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.25rem; }
+  .help-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--red-bg); border: 1px solid #F09595; border-radius: var(--radius-sm); font-size: 13px; color: var(--red-dark); }
+  .expert-pill { margin-left: auto; font-size: 11px; background: var(--blue-bg); color: var(--blue-dark); border: 1px solid #85B7EB; border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
+  .sgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; margin-bottom: 1.25rem; }
+  .sc { border-radius: var(--radius-sm); border: 1px solid var(--border); padding: 7px 10px; font-size: 12px; font-weight: 500; background: var(--bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+  .sc.s-ok { background: var(--green-bg); border-color: #5DCAA5; color: var(--green-dark); }
+  .sc.s-wait { background: var(--amber-bg); border-color: #EF9F27; color: var(--amber-dark); }
+  .sc.s-help { background: var(--red-bg); border-color: #F09595; color: var(--red-dark); }
+  .sc.s-expert { background: var(--blue-bg); border-color: #85B7EB; color: var(--blue-dark); }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; flex-shrink: 0; }
+  .d-ok { background: var(--green); } .d-wait { background: var(--amber); } .d-help { background: var(--red); } .d-expert { background: var(--blue); } .d-absent { background: var(--gray); }
+  .reset-btn { font-size: 12px; color: var(--muted); cursor: pointer; border: 1px solid var(--border); background: var(--bg); border-radius: var(--radius-sm); padding: 4px 10px; }
+  .reset-btn:hover { background: var(--bg2); }
+  .row-between { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+
+  footer { text-align: center; padding: 2rem 1rem 1rem; font-size: 11px; color: #aaa; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ÉTAPE 1 : Choix de la classe -->
+  <div id="v-class" class="view active">
+    <h1>Trétr'aide</h1>
+    <p class="subtitle">Informatique — Choisis ta classe</p>
+    <div class="step-indicator">
+      <div class="step active">1</div>
+      <div class="step-line"></div>
+      <span class="step-label">Classe</span>
+      <div class="step-line"></div>
+      <div class="step">2</div>
+      <div class="step-line"></div>
+      <span class="step-label">Nom &amp; statut</span>
+    </div>
+    <div class="card">
+      <p class="year-label">1ère année</p>
+      <div class="class-grid" id="grid-1ere"></div>
+      <p class="year-label">2ème année</p>
+      <div class="class-grid single" id="grid-2eme"></div>
+    </div>
+    <div class="switch-row">
+      <span class="link-btn" onclick="switchTo('prof')">Vue professeur →</span>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2 : Nom + statut -->
+  <div id="v-student" class="view">
+    <h1>Trétr'aide</h1>
+    <p class="subtitle" id="student-subtitle">Informatique</p>
+    <div class="step-indicator">
+      <div class="step done">✓</div>
+      <div class="step-line"></div>
+      <span class="step-label">Classe</span>
+      <div class="step-line"></div>
+      <div class="step active">2</div>
+      <div class="step-line"></div>
+      <span class="step-label">Nom &amp; statut</span>
+    </div>
+    <div class="back-btn" onclick="switchTo('class')">← Changer de classe</div>
+    <div class="card">
+      <p class="names-label">Ton nom</p>
+      <div class="names-grid" id="names-grid"></div>
+    </div>
+    <div id="status-section" style="display:none;">
+      <div class="status-grid">
+        <div class="status-btn btn-ok" onclick="setStatus('ok')">
+          <span class="btn-icon">✓</span>
+          <div class="btn-label">Ça va</div>
+          <div class="btn-desc">Je travaille</div>
+        </div>
+        <div class="status-btn btn-wait" onclick="setStatus('wait')">
+          <span class="btn-icon">⏳</span>
+          <div class="btn-label">J'attends</div>
+          <div class="btn-desc">Je continue quand même</div>
+        </div>
+        <div class="status-btn btn-help" onclick="setStatus('help')">
+          <span class="btn-icon">!</span>
+          <div class="btn-label">Besoin d'aide</div>
+          <div class="btn-desc">Je reste sur ma tâche</div>
+        </div>
+        <div class="status-btn btn-expert" onclick="setStatus('expert')">
+          <span class="btn-icon">★</span>
+          <div class="btn-label">Je peux aider</div>
+          <div class="btn-desc">Disponible pour un pair</div>
+        </div>
+      </div>
+      <div class="status-bar" id="sbar">Aucun statut sélectionné</div>
+    </div>
+    <div class="switch-row">
+      <span class="link-btn" onclick="switchTo('prof')">Vue professeur →</span>
+    </div>
+  </div>
+
+  <!-- VUE PROF -->
+  <div id="v-prof" class="view">
+    <h1>Trétr'aide</h1>
+    <p class="subtitle">Vue professeur — Temps réel</p>
+    <div class="tabs" id="tabs"></div>
+    <div class="stats">
+      <div class="stat s-ok"><div class="stat-n" id="n-ok">0</div><div class="stat-l">OK</div></div>
+      <div class="stat s-wait"><div class="stat-n" id="n-wait">0</div><div class="stat-l">Attente</div></div>
+      <div class="stat s-help"><div class="stat-n" id="n-help">0</div><div class="stat-l">Aide</div></div>
+      <div class="stat s-expert"><div class="stat-n" id="n-expert">0</div><div class="stat-l">Expert</div></div>
+    </div>
+    <div id="help-wrap"></div>
+    <div class="row-between">
+      <span class="section-title">Tous les élèves</span>
+      <button class="reset-btn" onclick="resetClass()">Réinitialiser</button>
+    </div>
+    <div class="sgrid" id="sgrid"></div>
+    <div class="switch-row">
+      <span class="link-btn" onclick="switchTo('class')">← Vue élève</span>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Système conçu par <strong style="color:#888;">Grulois Michael</strong> — Professeur d'informatique<br>
+  Développé avec l'assistance de Claude (Anthropic) · 2025
+</footer>
+
+<script>
+const CLASSES_1 = {
+  "1Ca": ["Adonou Enam Fabiola","Blain Nathan","Delcroix Mia","Deprince Ethan","Dervaux Anthime","Dessoubrie Victor","Ferrand Mathias","Gares Elias","Galessi Anna","Koita Ylies","Leblanc Yohann","Mangain Noah","Mincke Izéline","Paunkovic Thyméo","Peeters Louy","Storari Raphaël","Suys Emy","Van Wymeersch Lucie","Vinchent Debliquy Capucine"],
+  "1Cb": ["Bascuñán Vande Maele David","Bernard Florian","Cange Marina","Chantry Arthur","Delneste Lalie","Druart Néo","Dubois Jérémie","Duhayon Vicky","Fontaine Mathéo","Fourmentez Nohan","Heusschen Noémie","Lechantre Jules","Lefevere Fien","Lefevere Theo","Loeuille Juliette","Pollet Ella","Racquet Loïs","Rivière Louis","Soudant Lucie"],
+  "1Cc": ["Becquereau Janis","Carpentier Maxim","Delbar Ayden","Detavernier Cyril","Detournay Jul","Evrard Gabin","Jansens Sasha","Kayigumire Mac","Lefebvre Brieuc","Lefebvre Léna","Leroy Ewen","Mazurel Mathis","Mignot Nina","Pierre Gabriel","Piron Henri","Rivez Lily","Rousseau Amalia","Spreux Giulia"],
+  "1Cd": ["Alexandre Enoä","Alkhatib Tamer","Boero Antoine","Charron Lenny","Degobert Mathieu","Delcourt Nathan","Delcourt Nolan","Droin Molly","Dubois Méganne","Goudaillier Sasha","Laurent Jeanne","Lenel Nathan","Mansour Inès","Menez Zélia","Muylle Aleyna","Terras Suzanne","Trouvilliers Robin","Brabant Aurélia"]
+};
+
+const CLASSES_2 = {
+  "1De+2De": ["Andrieu Leonie","Bernard Rafaël","Colpaert Eléa","Dewilde Loucas","Durieux Cathaliya","Gilson Matias","Gosselin Claudy","Haji Alexy","Horinque Tiago","Isenborghs Prescilla","Masquelier Tyméo","Pottier Léo","Scarton Clara","Soil Keurtys","Trenteseaux Célia","Durieux Arthur","Malbrancke Hamza"]
+};
+
+const ALL_CLASSES = Object.assign({}, CLASSES_1, CLASSES_2);
+
+const SL = { ok:"Ça va", wait:"J'attends", help:"Besoin d'aide", expert:"Je peux aider" };
+const DD = { ok:"d-ok", wait:"d-wait", help:"d-help", expert:"d-expert", absent:"d-absent" };
+const SS = { ok:"s-ok", wait:"s-wait", help:"s-help", expert:"s-expert" };
+
+let state = {};
+let curStudent = "";
+let curClass = Object.keys(ALL_CLASSES)[0];
+
+Object.entries(ALL_CLASSES).forEach(([cls, names]) => names.forEach(n => state[n] = "absent"));
+
+function makeClassBtn(cls, names, container) {
+  const btn = document.createElement("div");
+  btn.className = "class-btn";
+  btn.innerHTML = '<div class="cls-name">' + cls + '</div><div class="cls-count">' + names.length + ' élèves</div>';
+  btn.onclick = () => {
+    buildNamesGrid(cls);
+    document.getElementById("student-subtitle").textContent = "Informatique — Classe " + cls;
+    switchTo("student");
+  };
+  container.appendChild(btn);
+}
+
+function buildClassGrid() {
+  const g1 = document.getElementById("grid-1ere");
+  const g2 = document.getElementById("grid-2eme");
+  g1.innerHTML = "";
+  g2.innerHTML = "";
+  Object.entries(CLASSES_1).forEach(([cls, names]) => makeClassBtn(cls, names, g1));
+  Object.entries(CLASSES_2).forEach(([cls, names]) => makeClassBtn(cls, names, g2));
+}
+
+function buildNamesGrid(cls) {
+  const grid = document.getElementById("names-grid");
+  grid.innerHTML = "";
+  curStudent = "";
+  document.getElementById("status-section").style.display = "none";
+  highlightBtn(null);
+  updateBar(null);
+
+  ALL_CLASSES[cls].forEach(n => {
+    const btn = document.createElement("div");
+    btn.className = "name-btn" + (state[n] !== "absent" ? " sel" : "");
+    btn.textContent = n;
+    btn.dataset.name = n;
+    btn.onclick = () => {
+      curStudent = n;
+      document.querySelectorAll(".name-btn").forEach(b => b.classList.remove("sel"));
+      btn.classList.add("sel");
+      document.getElementById("status-section").style.display = "block";
+      const s = state[n];
+      if (s === "absent") { state[n] = "ok"; highlightBtn("ok"); updateBar("ok"); }
+      else { highlightBtn(s); updateBar(s); }
+    };
+    grid.appendChild(btn);
+  });
+}
+
+function setStatus(s) {
+  if (!curStudent) return;
+  state[curStudent] = s;
+  highlightBtn(s);
+  updateBar(s);
+}
+
+function highlightBtn(s) {
+  document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("sel"));
+  const m = { ok:"btn-ok", wait:"btn-wait", help:"btn-help", expert:"btn-expert" };
+  if (s && m[s]) document.querySelectorAll("." + m[s]).forEach(b => b.classList.add("sel"));
+}
+
+function updateBar(s) {
+  const bar = document.getElementById("sbar");
+  bar.textContent = s ? "Statut actuel : " + SL[s] : "Aucun statut sélectionné";
+  bar.className = "status-bar" + (s ? " active" : "");
+}
+
+function buildTabs() {
+  const wrap = document.getElementById("tabs");
+  wrap.innerHTML = "";
+  Object.keys(ALL_CLASSES).forEach(cls => {
+    const t = document.createElement("div");
+    t.className = "tab" + (cls === curClass ? " active" : "");
+    t.textContent = cls;
+    t.onclick = () => { curClass = cls; buildTabs(); renderProf(); };
+    wrap.appendChild(t);
+  });
+}
+
+function renderProf() {
+  const names = ALL_CLASSES[curClass];
+  const list = names.map(n => ({ name: n, status: state[n] || "absent" }));
+  const counts = { ok:0, wait:0, help:0, expert:0 };
+  list.forEach(s => { if (counts[s.status] !== undefined) counts[s.status]++; });
+  document.getElementById("n-ok").textContent = counts.ok;
+  document.getElementById("n-wait").textContent = counts.wait;
+  document.getElementById("n-help").textContent = counts.help;
+  document.getElementById("n-expert").textContent = counts.expert;
+
+  const experts = list.filter(s => s.status === "expert");
+  const needHelp = list.filter(s => s.status === "help");
+  const hw = document.getElementById("help-wrap");
+  if (needHelp.length) {
+    let h = '<p class="section-title">Besoin d\'aide (' + needHelp.length + ')</p><div class="help-list">';
+    needHelp.forEach((s, i) => {
+      const ex = experts[i % experts.length];
+      h += '<div class="help-row"><span class="dot d-help"></span>' + s.name;
+      if (ex) h += '<span class="expert-pill">★ ' + ex.name.split(" ")[0] + '</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+    hw.innerHTML = h;
+  } else { hw.innerHTML = ''; }
+
+  const grid = document.getElementById("sgrid");
+  grid.innerHTML = "";
+  list.forEach(s => {
+    const c = document.createElement("div");
+    c.className = "sc" + (SS[s.status] ? " " + SS[s.status] : "");
+    c.title = s.name;
+    c.innerHTML = '<span class="dot ' + DD[s.status] + '"></span>' + s.name;
+    grid.appendChild(c);
+  });
+}
+
+function resetClass() {
+  ALL_CLASSES[curClass].forEach(n => { state[n] = "absent"; });
+  renderProf();
+}
+
+function switchTo(v) {
+  document.querySelectorAll(".view").forEach(el => el.classList.remove("active"));
+  document.getElementById("v-" + v).classList.add("active");
+  if (v === "prof") { buildTabs(); renderProf(); }
+  if (v === "class") { buildClassGrid(); }
+}
+
+buildClassGrid();
+buildTabs();
+renderProf();
+</script>
+</body>
+</html>
