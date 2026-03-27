@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trétra'aide — Informatique</title>
+<title>Trétr'aide — Informatique</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
+  :root {
     --green: #1D9E75; --green-bg: #E1F5EE; --green-dark: #085041;
     --amber: #BA7517; --amber-bg: #FAEEDA; --amber-dark: #633806;
     --red: #A32D2D; --red-bg: #FCEBEB; --red-dark: #501313;
@@ -21,6 +21,7 @@
   h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
   .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 1.5rem; }
   .card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+  label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
 
   .year-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 8px 2px; }
   .class-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1rem; }
@@ -30,6 +31,19 @@
   .class-btn:active { transform: scale(0.97); }
   .cls-name { font-size: 22px; font-weight: 700; color: var(--text); }
   .cls-count { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* MDP */
+  .pwd-wrap { display: flex; flex-direction: column; gap: 12px; }
+  .pwd-wrap .pwd-title { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+  .pwd-wrap .pwd-sub { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  .pwd-input-row { display: flex; gap: 8px; }
+  .pwd-input-row input { flex: 1; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 16px; letter-spacing: 4px; text-align: center; background: var(--bg); color: var(--text); }
+  .pwd-input-row input:focus { outline: none; border-color: var(--blue); }
+  .pwd-btn { padding: 10px 18px; border-radius: var(--radius-sm); border: none; background: var(--blue); color: white; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .pwd-btn:hover { opacity: 0.88; }
+  .pwd-error { font-size: 13px; color: var(--red); display: none; margin-top: 4px; }
+  .pwd-error.show { display: block; }
+  .pwd-hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
 
   .step-indicator { display: flex; align-items: center; gap: 6px; margin-bottom: 1.5rem; }
   .step { width: 24px; height: 24px; border-radius: 50%; font-size: 11px; font-weight: 600; border: 1.5px solid var(--border); color: var(--muted); background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -41,7 +55,6 @@
   .back-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); cursor: pointer; margin-bottom: 1.25rem; }
   .back-btn:hover { color: var(--text); }
 
-  /* Grille des noms */
   .names-label { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
   .names-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .name-btn { padding: 10px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg2); cursor: pointer; text-align: left; font-size: 13px; font-weight: 500; color: var(--text); transition: all 0.15s; user-select: none; line-height: 1.3; }
@@ -71,7 +84,6 @@
   .link-btn { font-size: 13px; color: var(--muted); cursor: pointer; text-decoration: underline; }
   .link-btn:hover { color: var(--text); }
 
-  /* Vue prof */
   .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
   .tab { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; cursor: pointer; background: var(--bg); color: var(--muted); }
   .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 500; }
@@ -86,31 +98,31 @@
   .section-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
   .help-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.25rem; }
   .help-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--red-bg); border: 1px solid #F09595; border-radius: var(--radius-sm); font-size: 13px; color: var(--red-dark); }
-  .expert-pill { margin-left: auto; font-size: 11px; background: var(--blue-bg); color: var(--blue-dark); border: 1px solid #85B7EB; border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
+  .expert-pill { margin-left: auto; font-size: 11px; background: var(--blue-bg); color: var(--blue-dark); border: 1px solid #7AB800; border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
   .sgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; margin-bottom: 1.25rem; }
   .sc { border-radius: var(--radius-sm); border: 1px solid var(--border); padding: 7px 10px; font-size: 12px; font-weight: 500; background: var(--bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
   .sc.s-ok { background: var(--green-bg); border-color: #5DCAA5; color: var(--green-dark); }
   .sc.s-wait { background: var(--amber-bg); border-color: #EF9F27; color: var(--amber-dark); }
   .sc.s-help { background: var(--red-bg); border-color: #F09595; color: var(--red-dark); }
-  .sc.s-expert { background: var(--blue-bg); border-color: #85B7EB; color: var(--blue-dark); }
+  .sc.s-expert { background: var(--blue-bg); border-color: #7AB800; color: var(--blue-dark); }
   .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; flex-shrink: 0; }
   .d-ok { background: var(--green); } .d-wait { background: var(--amber); } .d-help { background: var(--red); } .d-expert { background: var(--blue); } .d-absent { background: var(--gray); }
   .reset-btn { font-size: 12px; color: var(--muted); cursor: pointer; border: 1px solid var(--border); background: var(--bg); border-radius: var(--radius-sm); padding: 4px 10px; }
   .reset-btn:hover { background: var(--bg2); }
   .row-between { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-
+  .warning-bar { font-size: 11px; color: var(--red-dark); background: var(--red-bg); border: 1px solid #F09595; border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 1rem; text-align: center; }
   footer { text-align: center; padding: 2rem 1rem 1rem; font-size: 11px; color: #aaa; }
 </style>
 </head>
 <body>
 <div class="container">
 
- <div style="text-align:center; padding: 0.5rem 0 1.5rem;">
-  <img src="logo suk.jpg" alt="Logo école" style="height:60px; margin-bottom:8px; display:block; margin-left:auto; margin-right:auto;">
-  <p style="font-size:15px; font-weight:600; color:#1a1a18;">Sainte Union de Kain</p>
-  <p style="font-size:13px; color:#6b6a65;">Cours d'informatique</p>
-</div>
- 
+  <div style="text-align:center; padding: 0.5rem 0 1.5rem;">
+    <img src="logo_suk.jpg" alt="Logo école" style="height:60px; margin-bottom:8px; display:block; margin-left:auto; margin-right:auto;">
+    <p style="font-size:15px; font-weight:600; color:#1a1a18;">Sainte Union de Kain</p>
+    <p style="font-size:13px; color:#6b6a65;">Cours d'informatique</p>
+  </div>
+
   <!-- ÉTAPE 1 : Choix de la classe -->
   <div id="v-class" class="view active">
     <h1>Trétr'aide</h1>
@@ -127,11 +139,52 @@
     <div class="card">
       <p class="year-label">1ère année</p>
       <div class="class-grid" id="grid-1ere"></div>
-      <p class="year-label">DIFF</p>
+      <p class="year-label">2ème année</p>
       <div class="class-grid single" id="grid-2eme"></div>
     </div>
     <div class="switch-row">
-      <span class="link-btn" onclick="switchTo('prof')">Vue professeur →</span>
+      <span class="link-btn" onclick="askProfPwd()">Vue professeur →</span>
+    </div>
+  </div>
+
+  <!-- MDP CLASSE -->
+  <div id="v-pwd-class" class="view">
+    <h1>Trétr'aide</h1>
+    <p class="subtitle" id="pwd-class-subtitle">Accès classe</p>
+    <div class="card">
+      <div class="pwd-wrap">
+        <p class="pwd-title" id="pwd-class-title">Code de la classe</p>
+        <p class="pwd-sub">Demande le code à ton professeur.</p>
+        <div class="pwd-input-row">
+          <input type="password" id="pwd-class-input" maxlength="10" placeholder="• • • •" onkeydown="if(event.key==='Enter') checkClassPwd()">
+          <button class="pwd-btn" onclick="checkClassPwd()">OK</button>
+        </div>
+        <p class="pwd-error" id="pwd-class-error">Code incorrect, réessaie.</p>
+        <p class="pwd-hint">Le code est mémorisé sur ce poste jusqu'au redémarrage.</p>
+      </div>
+    </div>
+    <div class="switch-row">
+      <span class="link-btn" onclick="switchTo('class')">← Retour</span>
+    </div>
+  </div>
+
+  <!-- MDP PROF -->
+  <div id="v-pwd-prof" class="view">
+    <h1>Trétr'aide</h1>
+    <p class="subtitle">Accès professeur</p>
+    <div class="card">
+      <div class="pwd-wrap">
+        <p class="pwd-title">Mot de passe professeur</p>
+        <p class="pwd-sub">Réservé à l'enseignant.</p>
+        <div class="pwd-input-row">
+          <input type="password" id="pwd-prof-input" maxlength="20" placeholder="• • • • • • •" onkeydown="if(event.key==='Enter') checkProfPwd()">
+          <button class="pwd-btn" onclick="checkProfPwd()">OK</button>
+        </div>
+        <p class="pwd-error" id="pwd-prof-error">Mot de passe incorrect.</p>
+      </div>
+    </div>
+    <div class="switch-row">
+      <span class="link-btn" onclick="switchTo('class')">← Retour</span>
     </div>
   </div>
 
@@ -178,8 +231,11 @@
       </div>
       <div class="status-bar" id="sbar">Aucun statut sélectionné</div>
     </div>
-    <div class="switch-row">
-      <span class="link-btn" onclick="switchTo('prof')">Vue professeur →</span>
+    <div class="warning-bar">
+      Toute utilisation abusive — changer le statut d'un camarade, usage non sérieux... — sera sanctionnée par un rapport sur Smartschool.
+    </div>
+    <div class="switch-row" style="margin-top:1rem;">
+      <span class="link-btn" onclick="askProfPwd()">Vue professeur →</span>
     </div>
   </div>
 
@@ -207,12 +263,13 @@
 
 </div>
 
- <p style="font-size:11px; color:#A32D2D; background:#FCEBEB; border:1px solid #F09595; border-radius:6px; padding:10px 14px; margin-top:1rem; text-align:center;">
-  Toute utilisation abusive, changer le statut d'un camarade, usage non sérieux... — sera sanctionnée par un rapport sur Smartschool.
+<p style="font-size:11px; color:#A32D2D; background:#FCEBEB; border:1px solid #F09595; border-radius:6px; padding:10px 14px; margin: 0 1rem 1rem; text-align:center;">
+  Toute utilisation abusive — changer le statut d'un camarade, usage non sérieux... — sera sanctionnée par un rapport sur Smartschool.
 </p>
+
 <footer>
   Système conçu par <strong style="color:#888;">Grulois Michael</strong> — Professeur d'informatique<br>
-  Développé avec l'assistance de Claude (Anthropic) · 2026
+  Développé avec l'assistance de Claude (Anthropic) · 2025
 </footer>
 
 <script>
@@ -224,10 +281,19 @@ const CLASSES_1 = {
 };
 
 const CLASSES_2 = {
-  "1De+2De": ["Andrieu Leonie","Bernard Rafaël","Colpaert Eléa","Dewilde Loucas","Durieux Cathaliya","Gilson Matias","Gosselin Claudy","Haji Alexy","Horinque Tiago","Isenborghs Prescilla","Masquelier Tyméo","Pottier Léo","Scarton Clara","Soil Keurtys","Trenteseaux Célia"]
+  "1De+2De": ["Andrieu Leonie","Bernard Rafaël","Colpaert Eléa","Dewilde Loucas","Durieux Cathaliya","Gilson Matias","Gosselin Claudy","Haji Alexy","Horinque Tiago","Isenborghs Prescilla","Masquelier Tyméo","Pottier Léo","Scarton Clara","Soil Keurtys","Trenteseaux Célia","Durieux Arthur","Malbrancke Hamza"]
 };
 
 const ALL_CLASSES = Object.assign({}, CLASSES_1, CLASSES_2);
+
+const CLASS_PWDS = {
+  "1Ca": "1001",
+  "1Cb": "1002",
+  "1Cc": "1003",
+  "1Cd": "1004",
+  "1De+2De": "1000"
+};
+const PROF_PWD = "Grulo1s";
 
 const SL = { ok:"Ça va", wait:"J'attends", help:"Besoin d'aide", expert:"Je peux aider" };
 const DD = { ok:"d-ok", wait:"d-wait", help:"d-help", expert:"d-expert", absent:"d-absent" };
@@ -236,17 +302,41 @@ const SS = { ok:"s-ok", wait:"s-wait", help:"s-help", expert:"s-expert" };
 let state = {};
 let curStudent = "";
 let curClass = Object.keys(ALL_CLASSES)[0];
+let pendingClass = "";
 
 Object.entries(ALL_CLASSES).forEach(([cls, names]) => names.forEach(n => state[n] = "absent"));
+
+// MDP mémorisés en sessionStorage (jusqu'à fermeture du navigateur)
+function isClassUnlocked(cls) {
+  return sessionStorage.getItem("unlocked_" + cls) === "1";
+}
+function unlockClass(cls) {
+  sessionStorage.setItem("unlocked_" + cls, "1");
+}
+function isProfUnlocked() {
+  return sessionStorage.getItem("unlocked_prof") === "1";
+}
+function unlockProf() {
+  sessionStorage.setItem("unlocked_prof", "1");
+}
 
 function makeClassBtn(cls, names, container) {
   const btn = document.createElement("div");
   btn.className = "class-btn";
-  btn.innerHTML = '<div class="cls-name">' + cls + '</div><div class="cls-count">' + names.length + ' élèves</div>';
+  const locked = !isClassUnlocked(cls);
+  btn.innerHTML = '<div class="cls-name">' + cls + (locked ? ' <span style="font-size:14px;">🔒</span>' : '') + '</div><div class="cls-count">' + names.length + ' élèves</div>';
   btn.onclick = () => {
-    buildNamesGrid(cls);
-    document.getElementById("student-subtitle").textContent = "Informatique — Classe " + cls;
-    switchTo("student");
+    if (isClassUnlocked(cls)) {
+      openClass(cls);
+    } else {
+      pendingClass = cls;
+      document.getElementById("pwd-class-title").textContent = "Code pour " + cls;
+      document.getElementById("pwd-class-subtitle").textContent = "Accès — Classe " + cls;
+      document.getElementById("pwd-class-input").value = "";
+      document.getElementById("pwd-class-error").classList.remove("show");
+      switchTo("pwd-class");
+      setTimeout(() => document.getElementById("pwd-class-input").focus(), 100);
+    }
   };
   container.appendChild(btn);
 }
@@ -258,6 +348,51 @@ function buildClassGrid() {
   g2.innerHTML = "";
   Object.entries(CLASSES_1).forEach(([cls, names]) => makeClassBtn(cls, names, g1));
   Object.entries(CLASSES_2).forEach(([cls, names]) => makeClassBtn(cls, names, g2));
+}
+
+function checkClassPwd() {
+  const input = document.getElementById("pwd-class-input").value;
+  if (input === CLASS_PWDS[pendingClass]) {
+    unlockClass(pendingClass);
+    openClass(pendingClass);
+  } else {
+    document.getElementById("pwd-class-error").classList.add("show");
+    document.getElementById("pwd-class-input").value = "";
+    document.getElementById("pwd-class-input").focus();
+  }
+}
+
+function openClass(cls) {
+  buildNamesGrid(cls);
+  document.getElementById("student-subtitle").textContent = "Informatique — Classe " + cls;
+  switchTo("student");
+}
+
+function askProfPwd() {
+  if (isProfUnlocked()) {
+    switchTo("prof");
+    buildTabs();
+    renderProf();
+  } else {
+    document.getElementById("pwd-prof-input").value = "";
+    document.getElementById("pwd-prof-error").classList.remove("show");
+    switchTo("pwd-prof");
+    setTimeout(() => document.getElementById("pwd-prof-input").focus(), 100);
+  }
+}
+
+function checkProfPwd() {
+  const input = document.getElementById("pwd-prof-input").value;
+  if (input === PROF_PWD) {
+    unlockProf();
+    switchTo("prof");
+    buildTabs();
+    renderProf();
+  } else {
+    document.getElementById("pwd-prof-error").classList.add("show");
+    document.getElementById("pwd-prof-input").value = "";
+    document.getElementById("pwd-prof-input").focus();
+  }
 }
 
 function buildNamesGrid(cls) {
@@ -361,7 +496,6 @@ function resetClass() {
 function switchTo(v) {
   document.querySelectorAll(".view").forEach(el => el.classList.remove("active"));
   document.getElementById("v-" + v).classList.add("active");
-  if (v === "prof") { buildTabs(); renderProf(); }
   if (v === "class") { buildClassGrid(); }
 }
 
