@@ -5,6 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trétr'aide — Sainte Union de Kain</title>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCkZfkEFY55U5k1cizhZGAocipOQhdx-Wk",
+    authDomain: "tetra-aide.firebaseapp.com",
+    databaseURL: "https://tetra-aide-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "tetra-aide",
+    storageBucket: "tetra-aide.firebasestorage.app",
+    messagingSenderId: "366176896450",
+    appId: "1:366176896450:web:806caf5d7fea5cbe65825b"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.firebaseDB = db;
+  window.firebaseRef = ref;
+  window.firebaseSet = set;
+  window.firebaseOnValue = onValue;
+  window.firebaseGet = get;
+  window.firebaseReady = true;
+  window.dispatchEvent(new Event('firebaseReady'));
+</script>
 <style>
   :root {
     --bg-primary: #ffffff;
@@ -292,7 +317,34 @@ function loadClasse(c){
   return names.map((name,i)=>({id:i+1,name,tetra:0,rem:0}));
 }
 
-function saveClasse(c){ try{localStorage.setItem(storageKey(c),JSON.stringify(allData[c]));}catch(e){} }
+function setupFirebaseSync(){
+  if(!window.firebaseReady) return;
+  ALL_CLASSES.forEach(c=>{
+    window.firebaseOnValue(window.firebaseRef(window.firebaseDB,'classes/'+c), (snapshot)=>{
+      const data = snapshot.val();
+      if(!data) return;
+      const names = ALL_STUDENTS[c]||[];
+      const updated = names.map((name,i)=>{
+        const s = Array.isArray(data) ? data.find(x=>x&&x.name===name) : Object.values(data).find(x=>x&&x.name===name);
+        return {id:i+1, name, tetra:s?s.tetra||0:0, rem:s?s.rem||0:0};
+      });
+      const changed = JSON.stringify(updated) !== JSON.stringify(allData[c]);
+      allData[c] = updated;
+      try{localStorage.setItem(storageKey(c),JSON.stringify(allData[c]));}catch(e){}
+      if(changed && currentRole) render();
+    });
+  });
+  setSyncStatus('Synchronisé en temps réel','saved');
+}
+
+function saveClasse(c){
+  try{localStorage.setItem(storageKey(c),JSON.stringify(allData[c]));}catch(e){}
+  if(window.firebaseReady){
+    try{
+      window.firebaseSet(window.firebaseRef(window.firebaseDB,'classes/'+c), allData[c]);
+    }catch(e){console.error('Firebase save error:',e);}
+  }
+}
 
 function doLogin(){
   const classe=document.getElementById('loginClasse').value;
