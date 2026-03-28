@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trétr'aide — Sainte Union de Kain</title>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyCkZfkEFY55U5k1cizhZGAocipOQhdx-Wk",
     authDomain: "tetra-aide.firebaseapp.com",
@@ -18,15 +17,14 @@
     messagingSenderId: "366176896450",
     appId: "1:366176896450:web:806caf5d7fea5cbe65825b"
   };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+  const firebaseApp = firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
   window.firebaseDB = db;
-  window.firebaseRef = ref;
-  window.firebaseSet = set;
-  window.firebaseOnValue = onValue;
-  window.firebaseGet = get;
+  window.firebaseRef = (database, path) => database.ref(path);
+  window.firebaseSet = (ref, data) => ref.set(data);
+  window.firebaseOnValue = (ref, callback) => ref.on('value', callback);
+  window.firebaseGet = (ref) => ref.once('value');
   window.firebaseReady = true;
   window.dispatchEvent(new Event('firebaseReady'));
 </script>
@@ -320,7 +318,7 @@ function loadClasse(c){
 function setupFirebaseSync(){
   if(!window.firebaseReady) return;
   ALL_CLASSES.forEach(c=>{
-    window.firebaseOnValue(window.firebaseRef(window.firebaseDB,'classes/'+c), (snapshot)=>{
+    window.firebaseRef(window.firebaseDB,'classes/'+c).on('value', (snapshot)=>{
       const data = snapshot.val();
       if(!data) return;
       const names = ALL_STUDENTS[c]||[];
@@ -334,14 +332,14 @@ function setupFirebaseSync(){
       if(changed && currentRole) render();
     });
   });
-  setSyncStatus('Synchronisé en temps réel','saved');
+  setSyncStatus('Synchronisé en temps réel ⚡','saved');
 }
 
 function saveClasse(c){
   try{localStorage.setItem(storageKey(c),JSON.stringify(allData[c]));}catch(e){}
   if(window.firebaseReady){
     try{
-      window.firebaseSet(window.firebaseRef(window.firebaseDB,'classes/'+c), allData[c]);
+      window.firebaseRef(window.firebaseDB,'classes/'+c).set(allData[c]);
     }catch(e){console.error('Firebase save error:',e);}
   }
 }
