@@ -7,7 +7,6 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCkZfkEFY55U5k1cizhZGAocipOQhdx-Wk",
@@ -27,18 +26,8 @@
   window.firebaseOnValue = (ref, callback) => ref.on('value', callback);
   window.firebaseGet = (ref) => ref.once('value');
 
-  firebase.auth().onAuthStateChanged((user) => {
-    if(user) {
-      console.log('Auth OK, uid:', user.uid);
-      window.firebaseReady = true;
-      window.dispatchEvent(new Event('firebaseReady'));
-      if(window.currentRole) { setupFirebaseSync(); }
-    }
-  });
-
-  firebase.auth().signInAnonymously().catch((error) => {
-    console.error('Auth error:', error.code, error.message);
-  });
+  window.firebaseReady = true;
+  window.dispatchEvent(new Event('firebaseReady'));
 </script>
 <style>
   :root {
@@ -407,8 +396,8 @@ function startApp(){
     document.getElementById('eleveNameDisplay').textContent=currentEleveName;
   }
   render();
-  window.currentRole = currentRole;
   if(window.firebaseReady){ setupFirebaseSync(); }
+  else { window.addEventListener('firebaseReady', setupFirebaseSync); }
 }
 
 function doLogout(){
