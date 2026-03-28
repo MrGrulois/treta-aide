@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trétr'aide — Sainte Union de Kain</title>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <style>
   :root {
     --bg-primary: #ffffff;
@@ -273,7 +273,7 @@ let currentRole=null, currentClasse=null, currentEleveName=null, activeClass=nul
 let allData={};
 let emailPayload=null;
 
-emailjs.init(EMAILJS_PUBLIC_KEY);
+try { emailjs.init(EMAILJS_PUBLIC_KEY); } catch(e) { console.error('EmailJS init error:', e); }
 
 function storageKey(c){ return 'tretraide-v3-'+c; }
 
@@ -441,7 +441,9 @@ async function confirmSendEmail(){
   btn.disabled=true;btn.textContent='Envoi...';
   setSyncStatus('Envoi en cours...','sending');
   try{
-    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailPayload);
+    console.log("Sending:", EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailPayload);
+    const result = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailPayload);
+    console.log("Result:", result);
     closeEmailModal();
     setSyncStatus('Email envoyé avec succès !','sent');
     setTimeout(()=>setSyncStatus('',''),4000);
