@@ -1,81 +1,100 @@
-
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trétr'aide — Sainte Union de Kain</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-.app{padding:1rem 0;font-family:var(--font-sans);max-width:780px}
-.school{text-align:center;margin-bottom:1.25rem}
-.school-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
-.school-sub{font-size:13px;color:var(--color-text-secondary)}
-.app-title{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
-.app-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem}
-.view-toggle{display:flex;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden;margin-bottom:1rem;width:fit-content}
-.vt-btn{font-size:13px;padding:6px 16px;background:var(--color-background-primary);color:var(--color-text-secondary);border:none;cursor:pointer}
-.vt-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);font-weight:500}
-.classes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem}
-.cls-btn{font-size:13px;padding:6px 14px;border-radius:9999px;border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer}
-.cls-btn.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
-.stats-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
-.stat-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;text-align:center;background:var(--color-background-primary)}
-.stat-num{font-size:26px;font-weight:500}
-.stat-lbl{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
-.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.section-lbl{font-size:12px;font-weight:500;color:var(--color-text-secondary);letter-spacing:0.04em}
-.btn-action{font-size:12px;padding:5px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-secondary);cursor:pointer}
-.btn-action:hover{background:var(--color-background-secondary)}
-.students-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-@media(max-width:500px){.students-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:repeat(2,1fr)}}
-.stu-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:10px 12px;background:var(--color-background-primary);display:flex;flex-direction:column;gap:7px}
-.stu-card.mine{border-color:#185FA5;border-width:2px}
-.stu-top{display:flex;align-items:center;gap:8px}
-.status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;transition:background 0.3s}
-.stu-name{font-size:13px;font-weight:500;color:var(--color-text-primary);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tbadge{font-size:10px;font-weight:500;padding:2px 6px;border-radius:9999px;white-space:nowrap;flex-shrink:0}
-.t0{background:var(--color-background-secondary);color:var(--color-text-tertiary)}
-.t1{background:#EAF3DE;color:#3B6D11}
-.t2{background:#FAEEDA;color:#854F0B}
-.t3{background:#FAECE7;color:#993C1D}
-.t4{background:#E6F1FB;color:#0C447C}
-.stu-bottom{display:flex;align-items:center;gap:6px}
-.bar-track{flex:1;height:6px;background:var(--color-background-tertiary);border-radius:9999px;overflow:hidden}
-.bar-fill{height:100%;border-radius:9999px;transition:width 0.3s,background 0.3s}
-.rpill{font-size:10px;font-weight:500;padding:2px 6px;border-radius:9999px;white-space:nowrap;flex-shrink:0}
-.rp0{background:var(--color-background-secondary);color:var(--color-text-tertiary)}
-.rp1{background:#EAF3DE;color:#3B6D11}
-.rp2{background:#FAEEDA;color:#854F0B}
-.rp3{background:#FAECE7;color:#993C1D}
-.rp4{background:#FCEBEB;color:#A32D2D}
-.btn-pm{width:22px;height:22px;border-radius:50%;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
-.btn-pm:hover{background:var(--color-background-tertiary)}
-.btn-pm:disabled{opacity:0.3;cursor:default}
-.btn-ret{font-size:10px;padding:3px 7px;border-radius:var(--border-radius-md);border:0.5px solid #A32D2D;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-weight:500;flex-shrink:0}
-.btn-ret:hover{background:#F7C1C1}
-.eleve-panel{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:16px;margin-bottom:1.25rem}
-.eleve-sel-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.eleve-sel-row label{font-size:13px;color:var(--color-text-secondary);white-space:nowrap}
-.eleve-sel-row select{flex:1;min-width:160px;font-size:14px;font-weight:500;color:var(--color-text-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:7px 10px;background:var(--color-background-primary)}
-.tetra-btns{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-@media(max-width:420px){.tetra-btns{grid-template-columns:repeat(2,1fr)}}
-.tetra-btn{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 8px;text-align:center;cursor:pointer;background:var(--color-background-primary);display:flex;flex-direction:column;align-items:center;gap:6px}
-.tetra-btn.active{border-width:2px}
-.tetra-btn .dot{width:14px;height:14px;border-radius:50%}
-.tetra-btn .btn-label{font-size:13px;font-weight:500;color:var(--color-text-primary)}
-.tetra-btn .btn-desc{font-size:10px;color:var(--color-text-secondary);line-height:1.3}
-.status-current-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.status-current-row span{font-size:13px;color:var(--color-text-secondary)}
-.status-current-row strong{font-size:14px;font-weight:500}
-.sync-indicator{font-size:11px;color:var(--color-text-tertiary);text-align:right;margin-bottom:8px}
-.sync-indicator.saving{color:#BA7517}
-.sync-indicator.saved{color:#639922}
-.warning-bar{background:#FCEBEB;border-radius:var(--border-radius-md);padding:10px 14px;font-size:12px;color:#A32D2D;margin-top:1.25rem;line-height:1.5}
-.modal-bg{display:none;min-height:240px;background:rgba(0,0,0,0.4);border-radius:var(--border-radius-lg);align-items:center;justify-content:center;margin-top:10px}
-.modal-bg.open{display:flex}
-.modal{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-secondary);padding:1.25rem;width:290px;max-width:90%}
-.modal h3{font-size:15px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px}
-.modal p{font-size:13px;color:var(--color-text-secondary);line-height:1.5;margin-bottom:1rem}
-.modal-btns{display:flex;gap:8px;justify-content:flex-end}
-.btn-cancel{font-size:13px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:pointer}
-.btn-confirm{font-size:13px;padding:6px 12px;border-radius:var(--border-radius-md);background:#A32D2D;color:#FCEBEB;cursor:pointer;font-weight:500;border:none}
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f2;
+    --bg-tertiary: #eeede9;
+    --text-primary: #1a1a18;
+    --text-secondary: #6b6b67;
+    --text-tertiary: #9c9a92;
+    --border-light: rgba(0,0,0,0.12);
+    --border-mid: rgba(0,0,0,0.25);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg-tertiary); min-height: 100vh; padding: 1.5rem 1rem; }
+  .app { max-width: 780px; margin: 0 auto; }
+  .school { text-align: center; margin-bottom: 1.25rem; }
+  .school-name { font-size: 16px; font-weight: 500; color: var(--text-primary); }
+  .school-sub { font-size: 13px; color: var(--text-secondary); }
+  .app-title { font-size: 22px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
+  .app-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 1rem; }
+  .view-toggle { display: flex; border: 0.5px solid var(--border-mid); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 1rem; width: fit-content; }
+  .vt-btn { font-size: 13px; padding: 6px 16px; background: var(--bg-primary); color: var(--text-secondary); border: none; cursor: pointer; font-family: inherit; }
+  .vt-btn.active { background: var(--text-primary); color: #ffffff; font-weight: 500; }
+  .sync-indicator { font-size: 11px; color: var(--text-tertiary); text-align: right; margin-bottom: 8px; min-height: 16px; }
+  .sync-indicator.saving { color: #BA7517; }
+  .sync-indicator.saved { color: #639922; }
+  .classes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .cls-btn { font-size: 13px; padding: 6px 14px; border-radius: 9999px; border: 0.5px solid var(--border-mid); background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+  .cls-btn.active { background: var(--text-primary); color: #ffffff; border-color: var(--text-primary); }
+  .stats-row { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 1.25rem; }
+  .stat-card { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 12px; text-align: center; background: var(--bg-primary); }
+  .stat-num { font-size: 26px; font-weight: 500; }
+  .stat-lbl { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .section-lbl { font-size: 12px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.04em; }
+  .btn-action { font-size: 12px; padding: 5px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--border-mid); background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+  .btn-action:hover { background: var(--bg-secondary); }
+  .students-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+  @media(max-width: 520px) { .students-grid { grid-template-columns: 1fr; } .stats-row { grid-template-columns: repeat(2,1fr); } }
+  .stu-card { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 10px 12px; background: var(--bg-primary); display: flex; flex-direction: column; gap: 7px; }
+  .stu-card.mine { border-color: #185FA5; border-width: 2px; }
+  .stu-top { display: flex; align-items: center; gap: 8px; }
+  .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .stu-name { font-size: 13px; font-weight: 500; color: var(--text-primary); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tbadge { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 9999px; white-space: nowrap; flex-shrink: 0; }
+  .t0 { background: var(--bg-secondary); color: var(--text-tertiary); }
+  .t1 { background: #EAF3DE; color: #3B6D11; }
+  .t2 { background: #FAEEDA; color: #854F0B; }
+  .t3 { background: #FAECE7; color: #993C1D; }
+  .t4 { background: #E6F1FB; color: #0C447C; }
+  .stu-bottom { display: flex; align-items: center; gap: 6px; }
+  .bar-track { flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 9999px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 9999px; transition: width 0.3s, background 0.3s; }
+  .rpill { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 9999px; white-space: nowrap; flex-shrink: 0; }
+  .rp0 { background: var(--bg-secondary); color: var(--text-tertiary); }
+  .rp1 { background: #EAF3DE; color: #3B6D11; }
+  .rp2 { background: #FAEEDA; color: #854F0B; }
+  .rp3 { background: #FAECE7; color: #993C1D; }
+  .rp4 { background: #FCEBEB; color: #A32D2D; }
+  .btn-pm { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--border-mid); background: var(--bg-secondary); color: var(--text-secondary); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; font-family: inherit; }
+  .btn-pm:hover { background: var(--bg-tertiary); }
+  .btn-pm:disabled { opacity: 0.3; cursor: default; }
+  .btn-ret { font-size: 10px; padding: 4px 8px; border-radius: var(--radius-md); border: 0.5px solid #A32D2D; background: #FCEBEB; color: #A32D2D; cursor: pointer; font-weight: 500; flex-shrink: 0; font-family: inherit; }
+  .btn-ret:hover { background: #F7C1C1; }
+  .eleve-panel { background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 1.25rem; }
+  .eleve-sel-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .eleve-sel-row label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+  .eleve-sel-row select { flex: 1; min-width: 160px; font-size: 14px; font-weight: 500; color: var(--text-primary); border: 0.5px solid var(--border-mid); border-radius: var(--radius-md); padding: 7px 10px; background: var(--bg-primary); font-family: inherit; }
+  .tetra-btns { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
+  @media(max-width: 420px) { .tetra-btns { grid-template-columns: repeat(2,1fr); } }
+  .tetra-btn { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 12px 8px; text-align: center; cursor: pointer; background: var(--bg-primary); display: flex; flex-direction: column; align-items: center; gap: 6px; transition: border-color 0.15s; }
+  .tetra-btn.active { border-width: 2px; }
+  .tetra-btn .dot { width: 14px; height: 14px; border-radius: 50%; }
+  .tetra-btn .btn-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+  .tetra-btn .btn-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.3; text-align: center; }
+  .status-current-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .status-current-row span { font-size: 13px; color: var(--text-secondary); }
+  .status-current-row strong { font-size: 14px; font-weight: 500; }
+  .warning-bar { background: #FCEBEB; border-radius: var(--radius-md); padding: 10px 14px; font-size: 12px; color: #A32D2D; margin-top: 1.25rem; line-height: 1.5; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--bg-primary); border-radius: var(--radius-lg); border: 0.5px solid var(--border-mid); padding: 1.25rem; width: 300px; max-width: 90vw; }
+  .modal h3 { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; }
+  .modal p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem; }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+  .btn-cancel { font-size: 13px; padding: 6px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--border-mid); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+  .btn-confirm { font-size: 13px; padding: 6px 12px; border-radius: var(--radius-md); background: #A32D2D; color: #FCEBEB; cursor: pointer; font-weight: 500; border: none; font-family: inherit; }
 </style>
-
+</head>
+<body>
 <div class="app">
   <div class="school">
     <div class="school-name">Sainte Union de Kain</div>
@@ -109,7 +128,7 @@
       </div>
       <div class="status-current-row">
         <span>Mon statut :</span>
-        <strong id="currentStatusLabel" style="color:var(--color-text-secondary)">—</strong>
+        <strong id="currentStatusLabel" style="color:var(--text-secondary)">—</strong>
       </div>
       <div class="tetra-btns" id="tetraBtns"></div>
     </div>
@@ -125,7 +144,7 @@
   </div>
 </div>
 
-<div class="modal-bg" id="modalBg">
+<div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h3 id="mTitle"></h3>
     <p id="mBody"></p>
@@ -137,23 +156,25 @@
 </div>
 
 <script>
-const STORAGE_KEY='tretraide-data-v2';
-const POLL_INTERVAL=4000;
-const classesList=['1Ca','1Cb','1Cc','1Cd','1De+2De'];
-let activeClass=0;
-let currentView='prof';
-let pendingId=null;
-let pollTimer=null;
-let isSaving=false;
+const STORAGE_KEY = 'tretraide-data-v2';
+const POLL_INTERVAL = 4000;
+const classesList = ['1Ca','1Cb','1Cc','1Cd','1De+2De'];
+let activeClass = 0;
+let currentView = 'prof';
+let pendingId = null;
+let pollTimer = null;
+let isSaving = false;
+let eleveSelInit = false;
+let selectedEleve = null;
 
-const tetraColors=['#B4B2A9','#639922','#BA7517','#D85A30','#185FA5'];
-const tetraLabels=['—','OK','Attente','Aide','Expert'];
-const tetraBadgeClasses=['t0','t1','t2','t3','t4'];
-const tetraDescs=['','Je travaille, tout va bien.','J\'ai une question, j\'essaie quand même.','J\'ai besoin d\'aide maintenant.','J\'ai fini, je peux aider.'];
-const tetraActiveBg=['','#EAF3DE','#FAEEDA','#FAECE7','#E6F1FB'];
-const tetraActiveBorder=['','#3B6D11','#854F0B','#993C1D','#0C447C'];
+const tetraColors = ['#B4B2A9','#639922','#BA7517','#D85A30','#185FA5'];
+const tetraLabels = ['—','OK','Attente','Aide','Expert'];
+const tetraBadgeClasses = ['t0','t1','t2','t3','t4'];
+const tetraDescs = ['','Je travaille, tout va bien.','J\'ai une question, j\'essaie quand même.','J\'ai besoin d\'aide maintenant.','J\'ai fini, je peux aider.'];
+const tetraActiveBg = ['','#EAF3DE','#FAEEDA','#FAECE7','#E6F1FB'];
+const tetraActiveBorder = ['','#3B6D11','#854F0B','#993C1D','#0C447C'];
 
-const defaultStudents=[
+const defaultStudents = [
   {id:1,name:"Adonou Enam Fabi.",tetra:0,rem:0},
   {id:2,name:"Blain Nathan",tetra:0,rem:0},
   {id:3,name:"Delcroix Mia",tetra:0,rem:0},
@@ -175,128 +196,109 @@ const defaultStudents=[
   {id:19,name:"Vinchent Debliquy",tetra:0,rem:0},
 ];
 
-let students=JSON.parse(JSON.stringify(defaultStudents));
-let selectedEleve=null;
-let eleveSelInit=false;
+let students = JSON.parse(JSON.stringify(defaultStudents));
 
-function remInfo(r){
-  if(r>=5)return{label:"Retenue",cls:"rp4",color:"#E24B4A",pct:100};
-  if(r===4)return{label:"Menace",cls:"rp3",color:"#D85A30",pct:80};
-  if(r===3)return{label:"Rapport",cls:"rp2",color:"#BA7517",pct:60};
-  if(r>=1)return{label:r+" rem.",cls:"rp1",color:"#639922",pct:r*20};
-  return{label:"—",cls:"rp0",color:"transparent",pct:0};
+function remInfo(r) {
+  if(r>=5) return {label:"Retenue",cls:"rp4",color:"#E24B4A",pct:100};
+  if(r===4) return {label:"Menace",cls:"rp3",color:"#D85A30",pct:80};
+  if(r===3) return {label:"Rapport",cls:"rp2",color:"#BA7517",pct:60};
+  if(r>=1) return {label:r+" rem.",cls:"rp1",color:"#639922",pct:r*20};
+  return {label:"—",cls:"rp0",color:"transparent",pct:0};
 }
 
-function setSyncStatus(s){
-  const el=document.getElementById('syncIndicator');
-  if(s==='saving'){el.textContent='Sauvegarde...';el.className='sync-indicator saving';}
-  else if(s==='saved'){el.textContent='Synchronisé';el.className='sync-indicator saved';}
-  else if(s==='loading'){el.textContent='Chargement...';el.className='sync-indicator';}
-  else{el.textContent='';el.className='sync-indicator';}
+function setSyncStatus(s) {
+  const el = document.getElementById('syncIndicator');
+  if(s==='saving') { el.textContent='Sauvegarde...'; el.className='sync-indicator saving'; }
+  else if(s==='saved') { el.textContent='Synchronisé'; el.className='sync-indicator saved'; }
+  else if(s==='loading') { el.textContent='Chargement...'; el.className='sync-indicator'; }
+  else { el.textContent=''; el.className='sync-indicator'; }
 }
 
-async function saveData(){
-  if(isSaving)return;
-  isSaving=true;setSyncStatus('saving');
-  try{await window.storage.set(STORAGE_KEY,JSON.stringify(students),true);setSyncStatus('saved');}
-  catch(e){setSyncStatus('');}
-  isSaving=false;
+function saveData() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(students)); setSyncStatus('saved'); }
+  catch(e) { setSyncStatus(''); }
 }
 
-async function loadData(){
-  try{
-    const res=await window.storage.get(STORAGE_KEY,true);
-    if(res&&res.value){
-      const loaded=JSON.parse(res.value);
-      students=defaultStudents.map(def=>{
-        const s=loaded.find(x=>x.id===def.id);
-        return s?{...def,tetra:s.tetra||0,rem:s.rem||0}:def;
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) {
+      const loaded = JSON.parse(raw);
+      students = defaultStudents.map(def => {
+        const s = loaded.find(x => x.id === def.id);
+        return s ? {...def, tetra: s.tetra||0, rem: s.rem||0} : def;
       });
     }
     setSyncStatus('saved');
-  }catch(e){setSyncStatus('');}
+  } catch(e) { setSyncStatus(''); }
   render();
 }
 
-async function pollData(){
-  try{
-    const res=await window.storage.get(STORAGE_KEY,true);
-    if(res&&res.value){
-      const loaded=JSON.parse(res.value);
-      const updated=defaultStudents.map(def=>{
-        const s=loaded.find(x=>x.id===def.id);
-        return s?{...def,tetra:s.tetra||0,rem:s.rem||0}:def;
-      });
-      if(JSON.stringify(updated)!==JSON.stringify(students)){students=updated;render();}
-    }
-  }catch(e){}
-}
-
-function startPolling(){if(pollTimer)clearInterval(pollTimer);pollTimer=setInterval(pollData,POLL_INTERVAL);}
-
-function setView(v){
-  currentView=v;
-  document.getElementById('btnProf').classList.toggle('active',v==='prof');
-  document.getElementById('btnEleve').classList.toggle('active',v==='eleve');
-  document.getElementById('profView').style.display=v==='prof'?'':'none';
-  document.getElementById('eleveView').style.display=v==='eleve'?'':'none';
-  document.getElementById('appSub').textContent=v==='prof'?'Vue professeur — Temps réel':'Vue élève';
+function setView(v) {
+  currentView = v;
+  document.getElementById('btnProf').classList.toggle('active', v==='prof');
+  document.getElementById('btnEleve').classList.toggle('active', v==='eleve');
+  document.getElementById('profView').style.display = v==='prof' ? '' : 'none';
+  document.getElementById('eleveView').style.display = v==='eleve' ? '' : 'none';
+  document.getElementById('appSub').textContent = v==='prof' ? 'Vue professeur — Temps réel' : 'Vue élève';
   render();
 }
 
-function onEleveChange(){
-  selectedEleve=parseInt(document.getElementById('eleveSel').value)||null;
+function onEleveChange() {
+  selectedEleve = parseInt(document.getElementById('eleveSel').value) || null;
   render();
 }
 
-function setTetra(id,level){
-  const s=students.find(x=>x.id===id);if(!s)return;
-  s.tetra=s.tetra===level?0:level;
-  saveData();render();
+function setTetra(id, level) {
+  const s = students.find(x => x.id === id);
+  if(!s) return;
+  s.tetra = s.tetra === level ? 0 : level;
+  saveData(); render();
 }
 
-function addRem(id){const s=students.find(x=>x.id===id);if(s&&s.rem<5){s.rem++;saveData();render();}}
-function subRem(id){const s=students.find(x=>x.id===id);if(s&&s.rem>0){s.rem--;saveData();render();}}
+function addRem(id) { const s=students.find(x=>x.id===id); if(s&&s.rem<5){s.rem++;saveData();render();} }
+function subRem(id) { const s=students.find(x=>x.id===id); if(s&&s.rem>0){s.rem--;saveData();render();} }
 
-function openRet(id){
-  const s=students.find(x=>x.id===id);pendingId=id;
-  document.getElementById('mTitle').textContent='Retenue pour '+s.name+' ?';
-  document.getElementById('mBody').textContent='Cette action sera consignée dans le dossier de l\'élève ('+s.rem+' remarque'+(s.rem>1?'s':'')+').';
-  document.getElementById('modalBg').classList.add('open');
+function openRet(id) {
+  const s = students.find(x => x.id === id);
+  pendingId = id;
+  document.getElementById('mTitle').textContent = 'Retenue pour '+s.name+' ?';
+  document.getElementById('mBody').textContent = 'Cette action sera consignée dans le dossier de l\'élève ('+s.rem+' remarque'+(s.rem>1?'s':'')+').';
+  document.getElementById('modalOverlay').classList.add('open');
 }
-function closeModal(){document.getElementById('modalBg').classList.remove('open');pendingId=null;}
-function confirmRet(){if(pendingId!==null){students.find(x=>x.id===pendingId).rem=5;closeModal();saveData();render();}}
-function resetRemarks(){students.forEach(s=>s.rem=0);saveData();render();}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); pendingId=null; }
+function confirmRet() { if(pendingId!==null){students.find(x=>x.id===pendingId).rem=5;closeModal();saveData();render();} }
+function resetRemarks() { students.forEach(s=>s.rem=0); saveData(); render(); }
 
-function renderClasses(){
-  const cl=document.getElementById('classes');cl.innerHTML='';
-  classesList.forEach((c,i)=>{
-    const b=document.createElement('button');
-    b.className='cls-btn'+(i===activeClass?' active':'');
-    b.textContent=c;b.onclick=()=>{activeClass=i;renderClasses();};
+function renderClasses() {
+  const cl = document.getElementById('classes'); cl.innerHTML='';
+  classesList.forEach((c,i) => {
+    const b = document.createElement('button');
+    b.className = 'cls-btn'+(i===activeClass?' active':'');
+    b.textContent = c; b.onclick = ()=>{activeClass=i;renderClasses();};
     cl.appendChild(b);
   });
 }
 
-function renderStats(targetId){
+function renderStats(targetId) {
   const counts=[0,0,0,0];
   students.forEach(s=>{if(s.tetra>=1&&s.tetra<=4)counts[s.tetra-1]++;});
   const statLabels=['OK','Attente','Aide','Expert'];
   const statColors=['#639922','#BA7517','#D85A30','#185FA5'];
-  document.getElementById(targetId).innerHTML=statLabels.map((l,i)=>
+  document.getElementById(targetId).innerHTML = statLabels.map((l,i)=>
     `<div class="stat-card"><div class="stat-num" style="color:${statColors[i]}">${counts[i]}</div><div class="stat-lbl">${l}</div></div>`
   ).join('');
 }
 
-function renderProfGrid(){
-  const grid=document.getElementById('grid');grid.innerHTML='';
-  students.forEach(s=>{
-    const ri=remInfo(s.rem);
-    const dotColor=tetraColors[s.tetra]||tetraColors[0];
-    const badge=tetraBadgeClasses[s.tetra]||'t0';
-    const label=tetraLabels[s.tetra]||'—';
-    const retBtn=s.rem>=3?`<button class="btn-ret" onclick="openRet(${s.id})">Retenue</button>`:'';
-    const card=document.createElement('div');card.className='stu-card';
+function renderProfGrid() {
+  const grid = document.getElementById('grid'); grid.innerHTML='';
+  students.forEach(s => {
+    const ri = remInfo(s.rem);
+    const dotColor = tetraColors[s.tetra]||tetraColors[0];
+    const badge = tetraBadgeClasses[s.tetra]||'t0';
+    const label = tetraLabels[s.tetra]||'—';
+    const retBtn = s.rem>=3 ? `<button class="btn-ret" onclick="openRet(${s.id})">Retenue</button>` : '';
+    const card = document.createElement('div'); card.className='stu-card';
     card.innerHTML=`
       <div class="stu-top">
         <div class="status-dot" style="background:${dotColor}"></div>
@@ -314,31 +316,31 @@ function renderProfGrid(){
   });
 }
 
-function renderElevePanel(){
-  const sel=document.getElementById('eleveSel');
-  if(!eleveSelInit){
+function renderElevePanel() {
+  const sel = document.getElementById('eleveSel');
+  if(!eleveSelInit) {
     eleveSelInit=true;
-    const ph=document.createElement('option');ph.value='';ph.textContent='Choisir mon nom...';sel.appendChild(ph);
+    const ph=document.createElement('option'); ph.value=''; ph.textContent='Choisir mon nom...'; sel.appendChild(ph);
     students.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;sel.appendChild(o);});
   }
-  const me=students.find(x=>x.id===selectedEleve);
-  const curLevel=me?me.tetra:0;
-  const clbl=document.getElementById('currentStatusLabel');
-  clbl.textContent=tetraLabels[curLevel]||'—';
-  clbl.style.color=tetraColors[curLevel]||'var(--color-text-secondary)';
+  const me = students.find(x=>x.id===selectedEleve);
+  const curLevel = me ? me.tetra : 0;
+  const clbl = document.getElementById('currentStatusLabel');
+  clbl.textContent = tetraLabels[curLevel]||'—';
+  clbl.style.color = tetraColors[curLevel]||'var(--text-secondary)';
 
-  const btns=document.getElementById('tetraBtns');btns.innerHTML='';
-  [1,2,3,4].forEach(n=>{
-    const active=curLevel===n;
-    const btn=document.createElement('div');
-    btn.className='tetra-btn'+(active?' active':'');
+  const btns = document.getElementById('tetraBtns'); btns.innerHTML='';
+  [1,2,3,4].forEach(n => {
+    const active = curLevel===n;
+    const btn = document.createElement('div');
+    btn.className = 'tetra-btn'+(active?' active':'');
     if(active){btn.style.borderColor=tetraActiveBorder[n];btn.style.background=tetraActiveBg[n];}
-    btn.innerHTML=`<div class="dot" style="background:${tetraColors[n]}"></div><div class="btn-label" style="color:${active?tetraColors[n]:'var(--color-text-primary)'}">${tetraLabels[n]}</div><div class="btn-desc">${tetraDescs[n]}</div>`;
-    if(selectedEleve)btn.onclick=()=>setTetra(selectedEleve,n);
+    btn.innerHTML=`<div class="dot" style="background:${tetraColors[n]}"></div><div class="btn-label" style="color:${active?tetraColors[n]:'var(--text-primary)'}">${tetraLabels[n]}</div><div class="btn-desc">${tetraDescs[n]}</div>`;
+    if(selectedEleve) btn.onclick=()=>setTetra(selectedEleve,n);
     btns.appendChild(btn);
   });
 
-  const grid=document.getElementById('gridEleve');grid.innerHTML='';
+  const grid=document.getElementById('gridEleve'); grid.innerHTML='';
   students.forEach(s=>{
     const ri=remInfo(s.rem);
     const dotColor=tetraColors[s.tetra]||tetraColors[0];
@@ -360,12 +362,14 @@ function renderElevePanel(){
   });
 }
 
-function render(){
+function render() {
   renderClasses();
   if(currentView==='prof'){renderStats('statsRow');renderProfGrid();}
   else{renderStats('statsRowE');renderElevePanel();}
 }
 
 setSyncStatus('loading');
-loadData().then(()=>startPolling());
+loadData();
 </script>
+</body>
+</html>
