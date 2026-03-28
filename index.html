@@ -7,6 +7,7 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCkZfkEFY55U5k1cizhZGAocipOQhdx-Wk",
@@ -25,8 +26,18 @@
   window.firebaseSet = (ref, data) => ref.set(data);
   window.firebaseOnValue = (ref, callback) => ref.on('value', callback);
   window.firebaseGet = (ref) => ref.once('value');
-  window.firebaseReady = true;
-  window.dispatchEvent(new Event('firebaseReady'));
+
+  firebase.auth().signInAnonymously()
+    .then((userCredential) => {
+      console.log('Auth OK, uid:', userCredential.user.uid);
+      window.firebaseReady = true;
+      window.dispatchEvent(new Event('firebaseReady'));
+    })
+    .catch((error) => {
+      console.error('Auth error:', error);
+      window.firebaseReady = true;
+      window.dispatchEvent(new Event('firebaseReady'));
+    });
 </script>
 <style>
   :root {
