@@ -322,8 +322,9 @@ function setupFirebaseSync(){
       const data = snapshot.val();
       if(!data) return;
       const names = ALL_STUDENTS[c]||[];
+      const dataArr = Array.isArray(data) ? data : Object.values(data);
       const updated = names.map((name,i)=>{
-        const s = Array.isArray(data) ? data.find(x=>x&&x.name===name) : Object.values(data).find(x=>x&&x.name===name);
+        const s = dataArr.find(x=>x&&x.name===name);
         return {id:i+1, name, tetra:s?s.tetra||0:0, rem:s?s.rem||0:0};
       });
       const changed = JSON.stringify(updated) !== JSON.stringify(allData[c]);
@@ -394,6 +395,8 @@ function startApp(){
     document.getElementById('eleveNameDisplay').textContent=currentEleveName;
   }
   render();
+  if(window.firebaseReady){ setupFirebaseSync(); }
+  else { window.addEventListener('firebaseReady', setupFirebaseSync); }
 }
 
 function doLogout(){
