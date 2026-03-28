@@ -27,17 +27,20 @@
   window.firebaseOnValue = (ref, callback) => ref.on('value', callback);
   window.firebaseGet = (ref) => ref.once('value');
 
-  firebase.auth().signInAnonymously()
-    .then((userCredential) => {
-      console.log('Auth OK, uid:', userCredential.user.uid);
+  firebase.auth().onAuthStateChanged((user) => {
+    if(user) {
+      console.log('Auth OK, uid:', user.uid);
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseReady'));
-    })
-    .catch((error) => {
-      console.error('Auth error:', error);
-      window.firebaseReady = true;
-      window.dispatchEvent(new Event('firebaseReady'));
-    });
+    }
+  });
+
+  firebase.auth().signInAnonymously().catch((error) => {
+    console.error('Auth error:', error.code, error.message);
+    // Fallback: essayer quand même sans auth
+    window.firebaseReady = true;
+    window.dispatchEvent(new Event('firebaseReady'));
+  });
 </script>
 <style>
   :root {
