@@ -446,8 +446,10 @@ async function confirmSendEmail(){
     setSyncStatus('Email envoyé avec succès !','sent');
     setTimeout(()=>setSyncStatus('',''),4000);
   }catch(e){
-    setSyncStatus('Erreur d\'envoi. Vérifie la configuration EmailJS.','error');
-    setTimeout(()=>setSyncStatus('',''),5000);
+    const msg = e && e.text ? e.text : (e && e.message ? e.message : JSON.stringify(e));
+    setSyncStatus('Erreur : '+msg,'error');
+    alert('Erreur EmailJS :\n'+msg);
+    setTimeout(()=>setSyncStatus('',''),8000);
   }
   btn.disabled=false;btn.textContent='Envoyer';
   emailPayload=null;
