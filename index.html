@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trétr'aide — Sainte Union de Kain</title>
+<title>Tétra'aide — Sainte Union de Kain</title>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -158,7 +158,7 @@
     <div class="school-name">Sainte Union de Kain</div>
     <div class="school-sub">Cours d'informatique</div>
   </div>
-  <div class="app-title">Trétr'aide</div>
+  <div class="app-title">Tétra'aide</div>
   <div class="app-sub" id="appSub"></div>
 
   <div id="loginView">
@@ -471,11 +471,11 @@ function sendEmailReport(){
     return `- ${s.name} : ${sanction}`;
   }).join('\n');
 
-  const corps=`Classe : ${classe}\nDate : ${dateStr} à ${heureStr}\n\nÉlèves nécessitant une intervention :\n\n${lignes}\n\nEnvoyé depuis Trétr'aide — Sainte Union de Kain`;
+  const corps=`Classe : ${classe}\nDate : ${dateStr} à ${heureStr}\n\nÉlèves nécessitant une intervention :\n\n${lignes}\n\nEnvoyé depuis Tétra'aide — Sainte Union de Kain`;
 
   emailPayload={
     to_email: EMAIL_DESTINATAIRE,
-    subject: `[Trétr'aide] Rapport de comportement — ${classe} — ${dateStr}`,
+    subject: `[Tétra'aide] Rapport de comportement — ${classe} — ${dateStr}`,
     message: corps,
     classe: classe,
     date: dateStr+' à '+heureStr,
