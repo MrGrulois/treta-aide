@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trétr'aide — Sainte Union de Kain</title>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   :root {
     --bg-primary: #ffffff;
@@ -25,27 +26,52 @@
   .school-sub { font-size: 13px; color: var(--text-secondary); }
   .app-title { font-size: 22px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
   .app-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 1rem; }
-  .view-toggle { display: flex; border: 0.5px solid var(--border-mid); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 1rem; width: fit-content; }
-  .vt-btn { font-size: 13px; padding: 6px 16px; background: var(--bg-primary); color: var(--text-secondary); border: none; cursor: pointer; font-family: inherit; }
-  .vt-btn.active { background: var(--text-primary); color: #ffffff; font-weight: 500; }
+
+  .login-box { background: var(--bg-primary); border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 2rem; max-width: 360px; margin: 2rem auto; }
+  .login-box h2 { font-size: 16px; font-weight: 500; color: var(--text-primary); margin-bottom: 1.25rem; text-align: center; }
+  .login-box label { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+  .login-box select, .login-box input { width: 100%; font-size: 14px; padding: 8px 10px; border: 0.5px solid var(--border-mid); border-radius: var(--radius-md); background: var(--bg-primary); color: var(--text-primary); font-family: inherit; margin-bottom: 12px; }
+  .login-box button { width: 100%; font-size: 14px; font-weight: 500; padding: 10px; border-radius: var(--radius-md); border: none; background: var(--text-primary); color: #fff; cursor: pointer; font-family: inherit; }
+  .login-box button:hover { opacity: 0.88; }
+  .login-error { font-size: 12px; color: #A32D2D; background: #FCEBEB; border-radius: var(--radius-md); padding: 8px 10px; margin-bottom: 10px; display: none; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 0.5rem; }
+  .btn-logout { font-size: 12px; padding: 5px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--border-mid); background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+  .btn-logout:hover { background: var(--bg-secondary); }
+
   .sync-indicator { font-size: 11px; color: var(--text-tertiary); text-align: right; margin-bottom: 8px; min-height: 16px; }
-  .sync-indicator.saving { color: #BA7517; }
   .sync-indicator.saved { color: #639922; }
+  .sync-indicator.sending { color: #BA7517; }
+  .sync-indicator.sent { color: #639922; }
+  .sync-indicator.error { color: #A32D2D; }
+
   .classes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem; }
   .cls-btn { font-size: 13px; padding: 6px 14px; border-radius: 9999px; border: 0.5px solid var(--border-mid); background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
   .cls-btn.active { background: var(--text-primary); color: #ffffff; border-color: var(--text-primary); }
+
   .stats-row { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 1.25rem; }
   .stat-card { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 12px; text-align: center; background: var(--bg-primary); }
   .stat-num { font-size: 26px; font-weight: 500; }
   .stat-lbl { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
   .section-lbl { font-size: 12px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.04em; }
+  .section-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
   .btn-action { font-size: 12px; padding: 5px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--border-mid); background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
   .btn-action:hover { background: var(--bg-secondary); }
+
+  .btn-email { font-size: 12px; padding: 5px 14px; border-radius: var(--radius-md); border: 0.5px solid #185FA5; background: #E6F1FB; color: #0C447C; cursor: pointer; font-family: inherit; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .btn-email:hover { background: #B5D4F4; }
+  .btn-email:disabled { opacity: 0.4; cursor: default; }
+  .btn-email svg { width: 13px; height: 13px; flex-shrink: 0; }
+
   .students-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
   @media(max-width: 520px) { .students-grid { grid-template-columns: 1fr; } .stats-row { grid-template-columns: repeat(2,1fr); } }
+
   .stu-card { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 10px 12px; background: var(--bg-primary); display: flex; flex-direction: column; gap: 7px; }
-  .stu-card.mine { border-color: #185FA5; border-width: 2px; }
+  .stu-card.alert { border-color: #BA7517; }
+  .stu-card.danger { border-color: #A32D2D; }
   .stu-top { display: flex; align-items: center; gap: 8px; }
   .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   .stu-name { font-size: 13px; font-weight: 500; color: var(--text-primary); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -55,6 +81,7 @@
   .t2 { background: #FAEEDA; color: #854F0B; }
   .t3 { background: #FAECE7; color: #993C1D; }
   .t4 { background: #E6F1FB; color: #0C447C; }
+
   .stu-bottom { display: flex; align-items: center; gap: 6px; }
   .bar-track { flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 9999px; overflow: hidden; }
   .bar-fill { height: 100%; border-radius: 9999px; transition: width 0.3s, background 0.3s; }
@@ -64,18 +91,18 @@
   .rp2 { background: #FAEEDA; color: #854F0B; }
   .rp3 { background: #FAECE7; color: #993C1D; }
   .rp4 { background: #FCEBEB; color: #A32D2D; }
+
   .btn-pm { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--border-mid); background: var(--bg-secondary); color: var(--text-secondary); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; font-family: inherit; }
   .btn-pm:hover { background: var(--bg-tertiary); }
   .btn-pm:disabled { opacity: 0.3; cursor: default; }
   .btn-ret { font-size: 10px; padding: 4px 8px; border-radius: var(--radius-md); border: 0.5px solid #A32D2D; background: #FCEBEB; color: #A32D2D; cursor: pointer; font-weight: 500; flex-shrink: 0; font-family: inherit; }
   .btn-ret:hover { background: #F7C1C1; }
+
   .eleve-panel { background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 1.25rem; }
-  .eleve-sel-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
-  .eleve-sel-row label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
-  .eleve-sel-row select { flex: 1; min-width: 160px; font-size: 14px; font-weight: 500; color: var(--text-primary); border: 0.5px solid var(--border-mid); border-radius: var(--radius-md); padding: 7px 10px; background: var(--bg-primary); font-family: inherit; }
+  .eleve-name-display { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 14px; }
   .tetra-btns { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
   @media(max-width: 420px) { .tetra-btns { grid-template-columns: repeat(2,1fr); } }
-  .tetra-btn { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 12px 8px; text-align: center; cursor: pointer; background: var(--bg-primary); display: flex; flex-direction: column; align-items: center; gap: 6px; transition: border-color 0.15s; }
+  .tetra-btn { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 14px 8px; text-align: center; cursor: pointer; background: var(--bg-primary); display: flex; flex-direction: column; align-items: center; gap: 6px; }
   .tetra-btn.active { border-width: 2px; }
   .tetra-btn .dot { width: 14px; height: 14px; border-radius: 50%; }
   .tetra-btn .btn-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
@@ -83,15 +110,22 @@
   .status-current-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
   .status-current-row span { font-size: 13px; color: var(--text-secondary); }
   .status-current-row strong { font-size: 14px; font-weight: 500; }
+
   .warning-bar { background: #FCEBEB; border-radius: var(--radius-md); padding: 10px 14px; font-size: 12px; color: #A32D2D; margin-top: 1.25rem; line-height: 1.5; }
+
+  .no-alert { font-size: 13px; color: var(--text-tertiary); text-align: center; padding: 12px; font-style: italic; }
+
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
   .modal-overlay.open { display: flex; }
-  .modal { background: var(--bg-primary); border-radius: var(--radius-lg); border: 0.5px solid var(--border-mid); padding: 1.25rem; width: 300px; max-width: 90vw; }
+  .modal { background: var(--bg-primary); border-radius: var(--radius-lg); border: 0.5px solid var(--border-mid); padding: 1.25rem; width: 320px; max-width: 90vw; }
   .modal h3 { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; }
   .modal p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem; }
   .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
   .btn-cancel { font-size: 13px; padding: 6px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--border-mid); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
   .btn-confirm { font-size: 13px; padding: 6px 12px; border-radius: var(--radius-md); background: #A32D2D; color: #FCEBEB; cursor: pointer; font-weight: 500; border: none; font-family: inherit; }
+
+  .email-preview { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 1rem; font-size: 12px; color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap; max-height: 180px; overflow-y: auto; border: 0.5px solid var(--border-light); }
+  .email-preview strong { color: var(--text-primary); }
 </style>
 </head>
 <body>
@@ -101,49 +135,77 @@
     <div class="school-sub">Cours d'informatique</div>
   </div>
   <div class="app-title">Trétr'aide</div>
-  <div class="app-sub" id="appSub">Vue professeur — Temps réel</div>
+  <div class="app-sub" id="appSub"></div>
 
-  <div class="view-toggle">
-    <button class="vt-btn active" id="btnProf" onclick="setView('prof')">Professeur</button>
-    <button class="vt-btn" id="btnEleve" onclick="setView('eleve')">Élève</button>
-  </div>
-
-  <div id="syncIndicator" class="sync-indicator">Chargement...</div>
-  <div class="classes" id="classes"></div>
-
-  <div id="profView">
-    <div class="stats-row" id="statsRow"></div>
-    <div class="section-head">
-      <span class="section-lbl">TOUS LES ÉLÈVES</span>
-      <button class="btn-action" onclick="resetRemarks()">Réinitialiser les remarques</button>
+  <div id="loginView">
+    <div class="login-box">
+      <h2>Connexion</h2>
+      <div class="login-error" id="loginError">Code incorrect, réessaie.</div>
+      <label>Classe</label>
+      <select id="loginClasse">
+        <option value="">Choisir ma classe...</option>
+        <option value="1Ca">1Ca</option>
+        <option value="1Cb">1Cb</option>
+        <option value="1Cc">1Cc</option>
+        <option value="1Cd">1Cd</option>
+        <option value="1De+2De">1De+2De</option>
+        <option value="2CC">2Cc</option>
+        <option value="3TQS1">3Tqs1</option>
+        <option value="3TQS2">3Tqs2</option>
+        <option value="4EQAE1">4EQAE1</option>
+        <option value="4EQAE2">4EQAE2</option>
+        <option value="PROF">Professeur</option>
+      </select>
+      <label>Code d'accès</label>
+      <input type="password" id="loginCode" placeholder="••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <button onclick="doLogin()">Entrer</button>
     </div>
-    <div class="students-grid" id="grid"></div>
   </div>
 
-  <div id="eleveView" style="display:none">
-    <div class="eleve-panel">
-      <div class="eleve-sel-row">
-        <label>Je suis :</label>
-        <select id="eleveSel" onchange="onEleveChange()"></select>
+  <div id="mainView" style="display:none">
+    <div class="topbar">
+      <div id="viewToggleWrap"></div>
+      <button class="btn-logout" onclick="doLogout()">Déconnexion</button>
+    </div>
+    <div id="syncIndicator" class="sync-indicator"></div>
+    <div class="classes" id="classes"></div>
+
+    <div id="profView" style="display:none">
+      <div class="stats-row" id="statsRow"></div>
+      <div class="section-head">
+        <span class="section-lbl">TOUS LES ÉLÈVES</span>
+        <div class="section-actions">
+          <button class="btn-email" id="btnEmail" onclick="sendEmailReport()">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="1" y="3" width="14" height="10" rx="2" stroke="#0C447C" stroke-width="1.2"/>
+              <path d="M1 5l7 5 7-5" stroke="#0C447C" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Envoyer rapport
+          </button>
+          <button class="btn-action" onclick="resetRemarks()">Réinitialiser les remarques</button>
+        </div>
       </div>
-      <div class="status-current-row">
-        <span>Mon statut :</span>
-        <strong id="currentStatusLabel" style="color:var(--text-secondary)">—</strong>
-      </div>
-      <div class="tetra-btns" id="tetraBtns"></div>
+      <div class="students-grid" id="grid"></div>
     </div>
-    <div class="stats-row" id="statsRowE"></div>
-    <div class="section-head">
-      <span class="section-lbl">TOUTE LA CLASSE</span>
-    </div>
-    <div class="students-grid" id="gridEleve"></div>
-  </div>
 
-  <div class="warning-bar">
-    Toute utilisation abusive — changer le statut d'un camarade, usage non sérieux… — sera sanctionnée par un rapport sur Smartschool.
+    <div id="eleveView" style="display:none">
+      <div class="eleve-panel">
+        <div class="eleve-name-display" id="eleveNameDisplay"></div>
+        <div class="status-current-row">
+          <span>Mon statut :</span>
+          <strong id="currentStatusLabel" style="color:var(--text-secondary)">—</strong>
+        </div>
+        <div class="tetra-btns" id="tetraBtns"></div>
+      </div>
+    </div>
+
+    <div class="warning-bar">
+      Toute utilisation abusive — changer le statut d'un camarade, usage non sérieux… — sera sanctionnée par un rapport sur Smartschool.
+    </div>
   </div>
 </div>
 
+<!-- Modal retenue -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h3 id="mTitle"></h3>
@@ -155,150 +217,289 @@
   </div>
 </div>
 
+<!-- Modal email -->
+<div class="modal-overlay" id="emailModal">
+  <div class="modal">
+    <h3>Envoyer le rapport</h3>
+    <p id="emailModalDesc" style="margin-bottom:8px"></p>
+    <div class="email-preview" id="emailPreview"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEmailModal()">Annuler</button>
+      <button class="btn-confirm" id="btnSendConfirm" onclick="confirmSendEmail()" style="background:#185FA5">Envoyer</button>
+    </div>
+  </div>
+</div>
+
 <script>
-const STORAGE_KEY = 'tretraide-data-v2';
-const POLL_INTERVAL = 4000;
-const classesList = ['1Ca','1Cb','1Cc','1Cd','1De+2De'];
-let activeClass = 0;
-let currentView = 'prof';
-let pendingId = null;
-let pollTimer = null;
-let isSaving = false;
-let eleveSelInit = false;
-let selectedEleve = null;
+// ═══════════════════════════════════════════
+// CONFIGURATION EMAILJS — À REMPLIR
+// ═══════════════════════════════════════════
+const EMAILJS_PUBLIC_KEY  = 'yzcgp5RUWiKKgBowi';    // ex: aBcDeFgHiJkL
+const EMAILJS_SERVICE_ID  = 'service_r2p8jyp';    // ex: service_xxxxxxx
+const EMAILJS_TEMPLATE_ID = 'template_cqzgafv';   // ex: template_xxxxxxx
+const EMAIL_DESTINATAIRE  = 'a3d.contact@gmail.com'; // email fixe du destinataire
+// ═══════════════════════════════════════════
 
-const tetraColors = ['#B4B2A9','#639922','#BA7517','#D85A30','#185FA5'];
-const tetraLabels = ['—','OK','Attente','Aide','Expert'];
-const tetraBadgeClasses = ['t0','t1','t2','t3','t4'];
-const tetraDescs = ['','Je travaille, tout va bien.','J\'ai une question, j\'essaie quand même.','J\'ai besoin d\'aide maintenant.','J\'ai fini, je peux aider.'];
-const tetraActiveBg = ['','#EAF3DE','#FAEEDA','#FAECE7','#E6F1FB'];
-const tetraActiveBorder = ['','#3B6D11','#854F0B','#993C1D','#0C447C'];
+const PASSWORDS = {
+  '1Ca':'1001','1Cb':'1002','1Cc':'1003','1Cd':'1004',
+  '1De+2De':'1000','2CC':'2003','3TQS1':'3001','3TQS2':'3002',
+  '4EQAE1':'4001','4EQAE2':'4002','PROF':'Grulo1s'
+};
 
-const defaultStudents = [
-  {id:1,name:"Adonou Enam Fabi.",tetra:0,rem:0},
-  {id:2,name:"Blain Nathan",tetra:0,rem:0},
-  {id:3,name:"Delcroix Mia",tetra:0,rem:0},
-  {id:4,name:"Deprince Ethan",tetra:0,rem:0},
-  {id:5,name:"Dervaux Anthime",tetra:0,rem:0},
-  {id:6,name:"Dessoubrie Victor",tetra:0,rem:0},
-  {id:7,name:"Ferrand Mathias",tetra:0,rem:0},
-  {id:8,name:"Gares Elias",tetra:0,rem:0},
-  {id:9,name:"Galessi Anna",tetra:0,rem:0},
-  {id:10,name:"Koita Ylies",tetra:0,rem:0},
-  {id:11,name:"Leblanc Yohann",tetra:0,rem:0},
-  {id:12,name:"Mangain Noah",tetra:0,rem:0},
-  {id:13,name:"Mincke Izéline",tetra:0,rem:0},
-  {id:14,name:"Paunkovic Thyméo",tetra:0,rem:0},
-  {id:15,name:"Peeters Louy",tetra:0,rem:0},
-  {id:16,name:"Storari Raphaël",tetra:0,rem:0},
-  {id:17,name:"Suys Emy",tetra:0,rem:0},
-  {id:18,name:"Van Wymeersch Lu.",tetra:0,rem:0},
-  {id:19,name:"Vinchent Debliquy",tetra:0,rem:0},
-];
+const ALL_STUDENTS = {
+  '1Ca':['Adonou Enam Fabiola','Blain Nathan','Delcroix Mia','Deprince Ethan','Dervaux Anthime','Dessoubrie Victor','Ferrand Mathias','Gares Elias','Galessi Anna','Koita Ylies','Leblanc Yohann','Mangain Noah','Mincke Izéline','Paunkovic Thyméo','Peeters Louy','Storari Raphaël','Suys Emy','Van Wymeersch Lucie','Vinchent Debliquy Capucine'],
+  '1Cb':['Bascuñán Vande Maele David','Bernard Florian','Cange Marina','Chantry Arthur','Delneste Lalie','Druart Néo','Dubois Jérémie','Duhayon Vicky','Fontaine Mathéo','Fourmentez Nohan','Heusschen Noémie','Lechantre Jules','Lefevere Fien','Lefevere Theo','Loeuille Juliette','Pollet Ella','Racquet Loïs','Rivière Louis','Soudant Lucie'],
+  '1Cc':['Becquereau Janis','Carpentier Maxim','Delbar Ayden','Detavernier Cyril','Detournay Jul','Evrard Gabin','Jansens Sasha','Kayigumire Mac','Lefebvre Brieuc','Lefebvre Léna','Leroy Ewen','Mazurel Mathis','Mignot Nina','Pierre Gabriel','Piron Henri','Rivez Lily','Rousseau Amalia','Spreux Giulia'],
+  '1Cd':['Alexandre Enoä','Alkhatib Tamer','Boero Antoine','Charron Lenny','Degobert Mathieu','Delcourt Nathan','Delcourt Nolan','Droin Molly','Dubois Méganne','Goudaillier Sasha','Laurent Jeanne','Lenel Nathan','Mansour Inès','Menez Zélia','Muylle Aleyna','Terras Suzanne','Trouvilliers Robin'],
+  '1De+2De':['Andrieu Leonie','Bernard Rafaël','Colpaert Eléa','Dewilde Loucas','Durieux Cathaliya','Gilson Matias','Gosselin Claudy','Haji Alexy','Horinque Tiago','Isenborghs Prescilla','Masquelier Tyméo','Pottier Léo','Scarton Clara','Soil Keurtys','Trenteseaux Célia'],
+  '2CC':['Baucamp Mathéo','Caudory Lise','Delhuvenne Gaspard','Ferrand Bastien','Hanon Emy','Hemeleers Esteban','Huys Maellys','Jouret Raphaël','Koscielniak Leeroy','Lansquenet Flavie','Lemoine Tom','Nottebaert Romain','Soens Emy','Vancraybeck Lola','Velghe Enola','Walravens Lily','Yannakis Naëlle'],
+  '3TQS1':['Bambiri Bang Mba Brunelle Cyrillia','Beniest Eloïse','Brillion Bao','Cardon Vince','Chais Aiden','Craeye Lenny','Cuvillier Mattéo','Dambrain Ines','Deleporte Chloé','Foucart Victor','Gilmet Lenny','Jamart Arwed','Lecat Flavie','Leghait Emilien','Legrain Jean','Lorthioir Elise','Parsy Celia','Roels Enzo','Soil Sahona','Vanderstraeten Hugo'],
+  '3TQS2':['Altruy Tim','Amissi Sophya','Camblain Helena','Christiaens Noa','Crowin Zia','Delgutte Jaden','Delonville Elowane','Delpierre Orlan','Droin Cilou','Galliez Raphaël','Komsi Bernard','Lainez Célia','Mahy Selène','Meuris Brice','Montegnies Adriano','Rousseau Timéo','Stocman Nina','Van Caenenberg Louanne','Vangénéberg Ambre','Vion Dubois Mahe'],
+  '4EQAE1':['Baisieux Milan','Bruni Erin','Callens Marie','Carette Enzo','Cheval Margaux','Debaisieux Anthéo','Delamballerie Kenza','Deroubaix Noé','Faignard Nélie','Huyghe Janelle','Lecomte Maxine','Leveau Elina','Meulemans Théo','Mulnard Clément','Schietse Arthur','Verhelst Ombeline'],
+  '4EQAE2':['Blomme Noah','Debouvries Nathan','De Clerck Rachel','Deffrasnes Emeline','Desauvage Thalia','Detournay Evi','Ducoron Louna','Duhayon Suzon','Duplat Florian','Haidon Laura','Hanna Tsoline','Lecocq Gabin','Leroy Aline','Plowy Eliot','Vanryckeghem Victor','Verrijdt Elia'],
+};
 
-let students = JSON.parse(JSON.stringify(defaultStudents));
+const CLASSE_LABELS = {'1Ca':'1Ca','1Cb':'1Cb','1Cc':'1Cc','1Cd':'1Cd','1De+2De':'1De+2De','2CC':'2Cc','3TQS1':'3Tqs1','3TQS2':'3Tqs2','4EQAE1':'4EQAE1','4EQAE2':'4EQAE2'};
+const ALL_CLASSES = Object.keys(ALL_STUDENTS);
 
-function remInfo(r) {
-  if(r>=5) return {label:"Retenue",cls:"rp4",color:"#E24B4A",pct:100};
-  if(r===4) return {label:"Menace",cls:"rp3",color:"#D85A30",pct:80};
-  if(r===3) return {label:"Rapport",cls:"rp2",color:"#BA7517",pct:60};
-  if(r>=1) return {label:r+" rem.",cls:"rp1",color:"#639922",pct:r*20};
-  return {label:"—",cls:"rp0",color:"transparent",pct:0};
-}
+const tetraColors=['#B4B2A9','#639922','#BA7517','#D85A30','#185FA5'];
+const tetraLabels=['—','OK','Attente','Aide','Expert'];
+const tetraBadgeClasses=['t0','t1','t2','t3','t4'];
+const tetraDescs=['','Je travaille, tout va bien.','J\'ai une question, j\'essaie quand même.','J\'ai besoin d\'aide maintenant.','J\'ai fini, je peux aider.'];
+const tetraActiveBg=['','#EAF3DE','#FAEEDA','#FAECE7','#E6F1FB'];
+const tetraActiveBorder=['','#3B6D11','#854F0B','#993C1D','#0C447C'];
 
-function setSyncStatus(s) {
-  const el = document.getElementById('syncIndicator');
-  if(s==='saving') { el.textContent='Sauvegarde...'; el.className='sync-indicator saving'; }
-  else if(s==='saved') { el.textContent='Synchronisé'; el.className='sync-indicator saved'; }
-  else if(s==='loading') { el.textContent='Chargement...'; el.className='sync-indicator'; }
-  else { el.textContent=''; el.className='sync-indicator'; }
-}
+let currentRole=null, currentClasse=null, currentEleveName=null, activeClass=null, pendingId=null;
+let allData={};
+let emailPayload=null;
 
-function saveData() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(students)); setSyncStatus('saved'); }
-  catch(e) { setSyncStatus(''); }
-}
+emailjs.init(EMAILJS_PUBLIC_KEY);
 
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw) {
-      const loaded = JSON.parse(raw);
-      students = defaultStudents.map(def => {
-        const s = loaded.find(x => x.id === def.id);
-        return s ? {...def, tetra: s.tetra||0, rem: s.rem||0} : def;
+function storageKey(c){ return 'tretraide-v3-'+c; }
+
+function loadClasse(c){
+  const names=ALL_STUDENTS[c]||[];
+  try{
+    const raw=localStorage.getItem(storageKey(c));
+    if(raw){
+      const saved=JSON.parse(raw);
+      return names.map((name,i)=>{
+        const s=saved.find(x=>x.name===name);
+        return {id:i+1,name,tetra:s?s.tetra||0:0,rem:s?s.rem||0:0};
       });
     }
-    setSyncStatus('saved');
-  } catch(e) { setSyncStatus(''); }
+  }catch(e){}
+  return names.map((name,i)=>({id:i+1,name,tetra:0,rem:0}));
+}
+
+function saveClasse(c){ try{localStorage.setItem(storageKey(c),JSON.stringify(allData[c]));}catch(e){} }
+
+function doLogin(){
+  const classe=document.getElementById('loginClasse').value;
+  const code=document.getElementById('loginCode').value;
+  const err=document.getElementById('loginError');
+  if(!classe){err.style.display='block';err.textContent='Choisis ta classe.';return;}
+  if(PASSWORDS[classe]!==code){err.style.display='block';err.textContent='Code incorrect, réessaie.';return;}
+  err.style.display='none';
+  if(classe==='PROF'){currentRole='prof';startApp();}
+  else{currentRole='eleve';currentClasse=classe;askEleveName();}
+}
+
+function askEleveName(){
+  const students=ALL_STUDENTS[currentClasse]||[];
+  document.getElementById('loginView').innerHTML=`
+    <div class="login-box">
+      <h2>Qui es-tu ?</h2>
+      <label>Mon nom</label>
+      <select id="eleveNameSel">
+        <option value="">Choisir mon nom...</option>
+        ${students.map(n=>`<option value="${n}">${n}</option>`).join('')}
+      </select>
+      <div class="login-error" id="loginError2" style="display:none">Choisis ton nom.</div>
+      <button onclick="confirmEleveName()">Continuer</button>
+    </div>`;
+}
+
+function confirmEleveName(){
+  const sel=document.getElementById('eleveNameSel');
+  const err=document.getElementById('loginError2');
+  if(!sel.value){err.style.display='block';return;}
+  currentEleveName=sel.value;
+  startApp();
+}
+
+function startApp(){
+  ALL_CLASSES.forEach(c=>{allData[c]=loadClasse(c);});
+  activeClass=currentRole==='prof'?ALL_CLASSES[0]:currentClasse;
+  document.getElementById('loginView').style.display='none';
+  document.getElementById('mainView').style.display='';
+  if(currentRole==='prof'){
+    document.getElementById('appSub').textContent='Vue professeur — Temps réel';
+    document.getElementById('profView').style.display='';
+    document.getElementById('eleveView').style.display='none';
+  } else {
+    document.getElementById('appSub').textContent='Vue élève';
+    document.getElementById('profView').style.display='none';
+    document.getElementById('eleveView').style.display='';
+    document.getElementById('eleveNameDisplay').textContent=currentEleveName;
+  }
   render();
 }
 
-function setView(v) {
-  currentView = v;
-  document.getElementById('btnProf').classList.toggle('active', v==='prof');
-  document.getElementById('btnEleve').classList.toggle('active', v==='eleve');
-  document.getElementById('profView').style.display = v==='prof' ? '' : 'none';
-  document.getElementById('eleveView').style.display = v==='eleve' ? '' : 'none';
-  document.getElementById('appSub').textContent = v==='prof' ? 'Vue professeur — Temps réel' : 'Vue élève';
-  render();
+function doLogout(){
+  currentRole=null;currentClasse=null;currentEleveName=null;activeClass=null;allData={};
+  document.getElementById('mainView').style.display='none';
+  document.getElementById('loginView').innerHTML=`
+    <div class="login-box">
+      <h2>Connexion</h2>
+      <div class="login-error" id="loginError">Code incorrect, réessaie.</div>
+      <label>Classe</label>
+      <select id="loginClasse">
+        <option value="">Choisir ma classe...</option>
+        <option value="1Ca">1Ca</option><option value="1Cb">1Cb</option>
+        <option value="1Cc">1Cc</option><option value="1Cd">1Cd</option>
+        <option value="1De+2De">1De+2De</option><option value="2CC">2Cc</option>
+        <option value="3TQS1">3Tqs1</option><option value="3TQS2">3Tqs2</option>
+        <option value="4EQAE1">4EQAE1</option><option value="4EQAE2">4EQAE2</option>
+        <option value="PROF">Professeur</option>
+      </select>
+      <label>Code d'accès</label>
+      <input type="password" id="loginCode" placeholder="••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <button onclick="doLogin()">Entrer</button>
+    </div>`;
+  document.getElementById('loginView').style.display='';
+  document.getElementById('appSub').textContent='';
 }
 
-function onEleveChange() {
-  selectedEleve = parseInt(document.getElementById('eleveSel').value) || null;
-  render();
+function remInfo(r){
+  if(r>=5)return{label:'Retenue',cls:'rp4',color:'#E24B4A',pct:100};
+  if(r===4)return{label:'Menace',cls:'rp3',color:'#D85A30',pct:80};
+  if(r===3)return{label:'Rapport',cls:'rp2',color:'#BA7517',pct:60};
+  if(r>=1)return{label:r+' rem.',cls:'rp1',color:'#639922',pct:r*20};
+  return{label:'—',cls:'rp0',color:'transparent',pct:0};
 }
 
-function setTetra(id, level) {
-  const s = students.find(x => x.id === id);
-  if(!s) return;
-  s.tetra = s.tetra === level ? 0 : level;
-  saveData(); render();
+function setTetra(c,id,level){
+  const s=allData[c].find(x=>x.id===id);if(!s)return;
+  s.tetra=s.tetra===level?0:level;
+  saveClasse(c);render();
 }
 
-function addRem(id) { const s=students.find(x=>x.id===id); if(s&&s.rem<5){s.rem++;saveData();render();} }
-function subRem(id) { const s=students.find(x=>x.id===id); if(s&&s.rem>0){s.rem--;saveData();render();} }
+function addRem(id){const s=allData[activeClass].find(x=>x.id===id);if(s&&s.rem<5){s.rem++;saveClasse(activeClass);render();}}
+function subRem(id){const s=allData[activeClass].find(x=>x.id===id);if(s&&s.rem>0){s.rem--;saveClasse(activeClass);render();}}
 
-function openRet(id) {
-  const s = students.find(x => x.id === id);
-  pendingId = id;
-  document.getElementById('mTitle').textContent = 'Retenue pour '+s.name+' ?';
-  document.getElementById('mBody').textContent = 'Cette action sera consignée dans le dossier de l\'élève ('+s.rem+' remarque'+(s.rem>1?'s':'')+').';
+function openRet(id){
+  const s=allData[activeClass].find(x=>x.id===id);pendingId=id;
+  document.getElementById('mTitle').textContent='Retenue pour '+s.name+' ?';
+  document.getElementById('mBody').textContent='Cette action sera consignée dans le dossier ('+s.rem+' remarque'+(s.rem>1?'s':'')+').';
   document.getElementById('modalOverlay').classList.add('open');
 }
-function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); pendingId=null; }
-function confirmRet() { if(pendingId!==null){students.find(x=>x.id===pendingId).rem=5;closeModal();saveData();render();} }
-function resetRemarks() { students.forEach(s=>s.rem=0); saveData(); render(); }
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');pendingId=null;}
+function confirmRet(){if(pendingId!==null){allData[activeClass].find(x=>x.id===pendingId).rem=5;closeModal();saveClasse(activeClass);render();}}
+function resetRemarks(){allData[activeClass].forEach(s=>s.rem=0);saveClasse(activeClass);render();}
 
-function renderClasses() {
-  const cl = document.getElementById('classes'); cl.innerHTML='';
-  classesList.forEach((c,i) => {
-    const b = document.createElement('button');
-    b.className = 'cls-btn'+(i===activeClass?' active':'');
-    b.textContent = c; b.onclick = ()=>{activeClass=i;renderClasses();};
+function sendEmailReport(){
+  const students=allData[activeClass]||[];
+  const alertes=students.filter(s=>s.rem>=3);
+  const classe=CLASSE_LABELS[activeClass]||activeClass;
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('fr-BE',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const heureStr=now.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
+
+  if(alertes.length===0){
+    setSyncStatus('Aucun élève à signaler dans cette classe.','saved');
+    setTimeout(()=>setSyncStatus('',''),3000);
+    return;
+  }
+
+  const lignes=alertes.map(s=>{
+    const sanction=s.rem>=5?'Retenue':s.rem===4?'Menace de retenue':'Rapport de comportement';
+    return `- ${s.name} : ${sanction}`;
+  }).join('\n');
+
+  const corps=`Classe : ${classe}\nDate : ${dateStr} à ${heureStr}\n\nÉlèves nécessitant une intervention :\n\n${lignes}\n\nEnvoyé depuis Trétr'aide — Sainte Union de Kain`;
+
+  emailPayload={
+    to_email: EMAIL_DESTINATAIRE,
+    subject: `[Trétr'aide] Rapport de comportement — ${classe} — ${dateStr}`,
+    message: corps,
+    classe: classe,
+    date: dateStr+' à '+heureStr,
+  };
+
+  document.getElementById('emailModalDesc').textContent=
+    `${alertes.length} élève${alertes.length>1?'s':''} à signaler en ${classe} — envoi à ${EMAIL_DESTINATAIRE}`;
+  document.getElementById('emailPreview').textContent=corps;
+  document.getElementById('emailModal').classList.add('open');
+}
+
+function closeEmailModal(){document.getElementById('emailModal').classList.remove('open');emailPayload=null;}
+
+async function confirmSendEmail(){
+  if(!emailPayload)return;
+  const btn=document.getElementById('btnSendConfirm');
+  btn.disabled=true;btn.textContent='Envoi...';
+  setSyncStatus('Envoi en cours...','sending');
+  try{
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailPayload);
+    closeEmailModal();
+    setSyncStatus('Email envoyé avec succès !','sent');
+    setTimeout(()=>setSyncStatus('',''),4000);
+  }catch(e){
+    setSyncStatus('Erreur d\'envoi. Vérifie la configuration EmailJS.','error');
+    setTimeout(()=>setSyncStatus('',''),5000);
+  }
+  btn.disabled=false;btn.textContent='Envoyer';
+  emailPayload=null;
+}
+
+function setSyncStatus(msg,type){
+  const el=document.getElementById('syncIndicator');
+  el.textContent=msg;
+  el.className='sync-indicator'+(type?' '+type:'');
+}
+
+function renderClasses(){
+  const cl=document.getElementById('classes');cl.innerHTML='';
+  if(currentRole!=='prof'){cl.style.display='none';return;}
+  cl.style.display='';
+  ALL_CLASSES.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='cls-btn'+(c===activeClass?' active':'');
+    b.textContent=CLASSE_LABELS[c]||c;
+    b.onclick=()=>{activeClass=c;render();};
     cl.appendChild(b);
   });
 }
 
-function renderStats(targetId) {
+function renderStats(){
+  const students=allData[activeClass]||[];
   const counts=[0,0,0,0];
   students.forEach(s=>{if(s.tetra>=1&&s.tetra<=4)counts[s.tetra-1]++;});
   const statLabels=['OK','Attente','Aide','Expert'];
   const statColors=['#639922','#BA7517','#D85A30','#185FA5'];
-  document.getElementById(targetId).innerHTML = statLabels.map((l,i)=>
+  document.getElementById('statsRow').innerHTML=statLabels.map((l,i)=>
     `<div class="stat-card"><div class="stat-num" style="color:${statColors[i]}">${counts[i]}</div><div class="stat-lbl">${l}</div></div>`
   ).join('');
 }
 
-function renderProfGrid() {
-  const grid = document.getElementById('grid'); grid.innerHTML='';
-  students.forEach(s => {
-    const ri = remInfo(s.rem);
-    const dotColor = tetraColors[s.tetra]||tetraColors[0];
-    const badge = tetraBadgeClasses[s.tetra]||'t0';
-    const label = tetraLabels[s.tetra]||'—';
-    const retBtn = s.rem>=3 ? `<button class="btn-ret" onclick="openRet(${s.id})">Retenue</button>` : '';
-    const card = document.createElement('div'); card.className='stu-card';
+function renderProfGrid(){
+  const students=allData[activeClass]||[];
+  const grid=document.getElementById('grid');grid.innerHTML='';
+  const alertes=students.filter(s=>s.rem>=3);
+  const btn=document.getElementById('btnEmail');
+  if(btn) btn.disabled=alertes.length===0;
+
+  students.forEach(s=>{
+    const ri=remInfo(s.rem);
+    const dotColor=tetraColors[s.tetra]||tetraColors[0];
+    const badge=tetraBadgeClasses[s.tetra]||'t0';
+    const label=tetraLabels[s.tetra]||'—';
+    const retBtn=s.rem>=3?`<button class="btn-ret" onclick="openRet(${s.id})">Retenue</button>`:'';
+    let cardExtra='';
+    if(s.rem>=5)cardExtra=' danger';
+    else if(s.rem>=3)cardExtra=' alert';
+    const card=document.createElement('div');card.className='stu-card'+cardExtra;
     card.innerHTML=`
       <div class="stu-top">
         <div class="status-dot" style="background:${dotColor}"></div>
@@ -316,60 +517,30 @@ function renderProfGrid() {
   });
 }
 
-function renderElevePanel() {
-  const sel = document.getElementById('eleveSel');
-  if(!eleveSelInit) {
-    eleveSelInit=true;
-    const ph=document.createElement('option'); ph.value=''; ph.textContent='Choisir mon nom...'; sel.appendChild(ph);
-    students.forEach(s=>{const o=document.createElement('option');o.value=s.id;o.textContent=s.name;sel.appendChild(o);});
-  }
-  const me = students.find(x=>x.id===selectedEleve);
-  const curLevel = me ? me.tetra : 0;
-  const clbl = document.getElementById('currentStatusLabel');
-  clbl.textContent = tetraLabels[curLevel]||'—';
-  clbl.style.color = tetraColors[curLevel]||'var(--text-secondary)';
-
-  const btns = document.getElementById('tetraBtns'); btns.innerHTML='';
-  [1,2,3,4].forEach(n => {
-    const active = curLevel===n;
-    const btn = document.createElement('div');
-    btn.className = 'tetra-btn'+(active?' active':'');
+function renderElevePanel(){
+  const students=allData[currentClasse]||[];
+  const me=students.find(s=>s.name===currentEleveName);if(!me)return;
+  const curLevel=me.tetra;
+  const clbl=document.getElementById('currentStatusLabel');
+  clbl.textContent=tetraLabels[curLevel]||'—';
+  clbl.style.color=tetraColors[curLevel]||'var(--text-secondary)';
+  const btns=document.getElementById('tetraBtns');btns.innerHTML='';
+  [1,2,3,4].forEach(n=>{
+    const active=curLevel===n;
+    const btn=document.createElement('div');
+    btn.className='tetra-btn'+(active?' active':'');
     if(active){btn.style.borderColor=tetraActiveBorder[n];btn.style.background=tetraActiveBg[n];}
     btn.innerHTML=`<div class="dot" style="background:${tetraColors[n]}"></div><div class="btn-label" style="color:${active?tetraColors[n]:'var(--text-primary)'}">${tetraLabels[n]}</div><div class="btn-desc">${tetraDescs[n]}</div>`;
-    if(selectedEleve) btn.onclick=()=>setTetra(selectedEleve,n);
+    btn.onclick=()=>setTetra(currentClasse,me.id,n);
     btns.appendChild(btn);
   });
-
-  const grid=document.getElementById('gridEleve'); grid.innerHTML='';
-  students.forEach(s=>{
-    const ri=remInfo(s.rem);
-    const dotColor=tetraColors[s.tetra]||tetraColors[0];
-    const badge=tetraBadgeClasses[s.tetra]||'t0';
-    const label=tetraLabels[s.tetra]||'—';
-    const card=document.createElement('div');
-    card.className='stu-card'+(s.id===selectedEleve?' mine':'');
-    card.innerHTML=`
-      <div class="stu-top">
-        <div class="status-dot" style="background:${dotColor}"></div>
-        <span class="stu-name">${s.name}${s.id===selectedEleve?' (moi)':''}</span>
-        <span class="tbadge ${badge}">${label}</span>
-      </div>
-      <div class="stu-bottom">
-        <div class="bar-track"><div class="bar-fill" style="width:${ri.pct}%;background:${ri.color}"></div></div>
-        <span class="rpill ${ri.cls}">${ri.label}</span>
-      </div>`;
-    grid.appendChild(card);
-  });
 }
 
-function render() {
+function render(){
   renderClasses();
-  if(currentView==='prof'){renderStats('statsRow');renderProfGrid();}
-  else{renderStats('statsRowE');renderElevePanel();}
+  if(currentRole==='prof'){renderStats();renderProfGrid();}
+  else{renderElevePanel();}
 }
-
-setSyncStatus('loading');
-loadData();
 </script>
 </body>
 </html>
