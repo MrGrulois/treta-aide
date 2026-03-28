@@ -32,14 +32,12 @@
       console.log('Auth OK, uid:', user.uid);
       window.firebaseReady = true;
       window.dispatchEvent(new Event('firebaseReady'));
+      if(window.currentRole) { setupFirebaseSync(); }
     }
   });
 
   firebase.auth().signInAnonymously().catch((error) => {
     console.error('Auth error:', error.code, error.message);
-    // Fallback: essayer quand même sans auth
-    window.firebaseReady = true;
-    window.dispatchEvent(new Event('firebaseReady'));
   });
 </script>
 <style>
@@ -409,8 +407,8 @@ function startApp(){
     document.getElementById('eleveNameDisplay').textContent=currentEleveName;
   }
   render();
+  window.currentRole = currentRole;
   if(window.firebaseReady){ setupFirebaseSync(); }
-  else { window.addEventListener('firebaseReady', setupFirebaseSync); }
 }
 
 function doLogout(){
