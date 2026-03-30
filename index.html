@@ -3,602 +3,486 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tétra'aide — Sainte Union de Kain</title>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCkZfkEFY55U5k1cizhZGAocipOQhdx-Wk",
-    authDomain: "tetra-aide.firebaseapp.com",
-    databaseURL: "https://tetra-aide-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "tetra-aide",
-    storageBucket: "tetra-aide.firebasestorage.app",
-    messagingSenderId: "366176896450",
-    appId: "1:366176896450:web:806caf5d7fea5cbe65825b"
-  };
-  const firebaseApp = firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-
-  window.firebaseDB = db;
-  window.firebaseRef = (database, path) => database.ref(path);
-  window.firebaseSet = (ref, data) => ref.set(data);
-  window.firebaseOnValue = (ref, callback) => ref.on('value', callback);
-  window.firebaseGet = (ref) => ref.once('value');
-
-  window.firebaseReady = true;
-  window.dispatchEvent(new Event('firebaseReady'));
-</script>
+<title>Trétr'aide — Informatique</title>
 <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg-primary: #ffffff;
-    --bg-secondary: #f5f5f2;
-    --bg-tertiary: #eeede9;
-    --text-primary: #1a1a18;
-    --text-secondary: #6b6b67;
-    --text-tertiary: #9c9a92;
-    --border-light: rgba(0,0,0,0.12);
-    --border-mid: rgba(0,0,0,0.25);
-    --radius-md: 8px;
-    --radius-lg: 12px;
+    --green: #1D9E75; --green-bg: #E1F5EE; --green-dark: #085041;
+    --amber: #BA7517; --amber-bg: #FAEEDA; --amber-dark: #633806;
+    --red: #A32D2D; --red-bg: #FCEBEB; --red-dark: #501313;
+    --blue: #7AB800; --blue-bg: #f0f9e0; --blue-dark: #3d6000;
+    --gray: #888780; --border: #e2e0d8; --text: #1a1a18; --muted: #6b6a65;
+    --bg: #ffffff; --bg2: #f7f6f1; --radius: 10px; --radius-sm: 6px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg-tertiary); min-height: 100vh; padding: 1.5rem 1rem; }
-  .app { max-width: 780px; margin: 0 auto; }
-  .school { text-align: center; margin-bottom: 1.25rem; }
-  .school-name { font-size: 16px; font-weight: 500; color: var(--text-primary); }
-  .school-sub { font-size: 13px; color: var(--text-secondary); }
-  .app-title { font-size: 22px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
-  .app-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 1rem; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg2); color: var(--text); min-height: 100vh; }
+  .container { max-width: 640px; margin: 0 auto; padding: 1.5rem 1rem; }
+  .view { display: none; }
+  .view.active { display: block; }
+  h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 1.25rem; }
+  .card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+  label { font-size: 13px; color: var(--muted); display: block; margin-bottom: 6px; }
 
-  .login-box { background: var(--bg-primary); border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 2rem; max-width: 360px; margin: 2rem auto; }
-  .login-box h2 { font-size: 16px; font-weight: 500; color: var(--text-primary); margin-bottom: 1.25rem; text-align: center; }
-  .login-box label { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
-  .login-box select, .login-box input { width: 100%; font-size: 14px; padding: 8px 10px; border: 0.5px solid var(--border-mid); border-radius: var(--radius-md); background: var(--bg-primary); color: var(--text-primary); font-family: inherit; margin-bottom: 12px; }
-  .login-box button { width: 100%; font-size: 14px; font-weight: 500; padding: 10px; border-radius: var(--radius-md); border: none; background: var(--text-primary); color: #fff; cursor: pointer; font-family: inherit; }
-  .login-box button:hover { opacity: 0.88; }
-  .login-error { font-size: 12px; color: #A32D2D; background: #FCEBEB; border-radius: var(--radius-md); padding: 8px 10px; margin-bottom: 10px; display: none; }
+  .year-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 8px 2px; }
+  .class-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .class-grid.single { grid-template-columns: 1fr; }
+  .class-btn { padding: 1.25rem 1rem; border-radius: var(--radius); border: 1.5px solid var(--border); background: var(--bg); cursor: pointer; text-align: center; transition: all 0.15s; user-select: none; }
+  .class-btn:hover { border-color: var(--blue); }
+  .class-btn:active { transform: scale(0.97); }
+  .cls-name { font-size: 22px; font-weight: 700; color: var(--text); }
+  .cls-count { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 0.5rem; }
-  .btn-logout { font-size: 12px; padding: 5px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--border-mid); background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
-  .btn-logout:hover { background: var(--bg-secondary); }
+  .pwd-wrap { display: flex; flex-direction: column; gap: 12px; }
+  .pwd-wrap .pwd-title { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+  .pwd-wrap .pwd-sub { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  .pwd-input-row { display: flex; gap: 8px; }
+  .pwd-input-row input { flex: 1; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: 16px; letter-spacing: 4px; text-align: center; background: var(--bg); color: var(--text); }
+  .pwd-input-row input:focus { outline: none; border-color: var(--blue); }
+  .pwd-btn { padding: 10px 18px; border-radius: var(--radius-sm); border: none; background: var(--blue); color: white; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .pwd-btn:hover { opacity: 0.88; }
+  .pwd-error { font-size: 13px; color: var(--red); display: none; margin-top: 4px; }
+  .pwd-error.show { display: block; }
+  .pwd-hint { font-size: 11px; color: var(--muted); margin-top: 6px; }
 
-  .sync-indicator { font-size: 11px; color: var(--text-tertiary); text-align: right; margin-bottom: 8px; min-height: 16px; }
-  .sync-indicator.saved { color: #639922; }
-  .sync-indicator.sending { color: #BA7517; }
-  .sync-indicator.sent { color: #639922; }
-  .sync-indicator.error { color: #A32D2D; }
+  .step-indicator { display: flex; align-items: center; gap: 6px; margin-bottom: 1.5rem; }
+  .step { width: 24px; height: 24px; border-radius: 50%; font-size: 11px; font-weight: 600; border: 1.5px solid var(--border); color: var(--muted); background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step.done { background: var(--green); border-color: var(--green); color: white; }
+  .step.active { background: var(--text); border-color: var(--text); color: var(--bg); }
+  .step-line { flex: 1; height: 1px; background: var(--border); }
+  .step-label { font-size: 12px; color: var(--muted); white-space: nowrap; }
 
-  .classes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem; }
-  .cls-btn { font-size: 13px; padding: 6px 14px; border-radius: 9999px; border: 0.5px solid var(--border-mid); background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
-  .cls-btn.active { background: var(--text-primary); color: #ffffff; border-color: var(--text-primary); }
+  .back-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); cursor: pointer; margin-bottom: 1.25rem; }
+  .back-btn:hover { color: var(--text); }
 
-  .stats-row { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 1.25rem; }
-  .stat-card { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 12px; text-align: center; background: var(--bg-primary); }
-  .stat-num { font-size: 26px; font-weight: 500; }
-  .stat-lbl { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .names-label { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .names-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .name-btn { padding: 10px 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--bg2); cursor: pointer; text-align: left; font-size: 13px; font-weight: 500; color: var(--text); transition: all 0.15s; user-select: none; line-height: 1.3; }
+  .name-btn:hover { border-color: var(--blue); background: var(--blue-bg); color: var(--blue-dark); }
+  .name-btn:active { transform: scale(0.97); }
+  .name-btn.sel { background: var(--blue-bg); border-color: var(--blue); color: var(--blue-dark); font-weight: 600; }
 
-  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
-  .section-lbl { font-size: 12px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.04em; }
-  .section-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 1.25rem; }
+  .status-btn { padding: 1rem; border-radius: var(--radius); border: 1.5px solid var(--border); background: var(--bg); cursor: pointer; text-align: center; transition: all 0.15s; user-select: none; }
+  .status-btn:active { transform: scale(0.97); }
+  .btn-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+  .btn-label { font-size: 13px; font-weight: 600; }
+  .btn-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .btn-ok .btn-label { color: var(--green-dark); }
+  .btn-wait .btn-label { color: var(--amber-dark); }
+  .btn-help .btn-label { color: var(--red-dark); }
+  .btn-expert .btn-label { color: var(--blue-dark); }
+  .btn-ok.sel { background: var(--green-bg); border-color: var(--green); }
+  .btn-wait.sel { background: var(--amber-bg); border-color: var(--amber); }
+  .btn-help.sel { background: var(--red-bg); border-color: var(--red); }
+  .btn-expert.sel { background: var(--blue-bg); border-color: var(--blue); }
 
-  .btn-action { font-size: 12px; padding: 5px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--border-mid); background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
-  .btn-action:hover { background: var(--bg-secondary); }
+  .status-bar { margin-top: 1rem; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--bg2); border: 1px solid var(--border); font-size: 13px; color: var(--muted); }
+  .status-bar.active { color: var(--text); font-weight: 500; }
 
-  .btn-email { font-size: 12px; padding: 5px 14px; border-radius: var(--radius-md); border: 0.5px solid #185FA5; background: #E6F1FB; color: #0C447C; cursor: pointer; font-family: inherit; font-weight: 500; display: flex; align-items: center; gap: 6px; }
-  .btn-email:hover { background: #B5D4F4; }
-  .btn-email:disabled { opacity: 0.4; cursor: default; }
-  .btn-email svg { width: 13px; height: 13px; flex-shrink: 0; }
+  .switch-row { margin-top: 1.25rem; }
+  .link-btn { font-size: 13px; color: var(--muted); cursor: pointer; text-decoration: underline; }
+  .link-btn:hover { color: var(--text); }
 
-  .students-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
-  @media(max-width: 520px) { .students-grid { grid-template-columns: 1fr; } .stats-row { grid-template-columns: repeat(2,1fr); } }
-
-  .stu-card { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 10px 12px; background: var(--bg-primary); display: flex; flex-direction: column; gap: 7px; }
-  .stu-card.alert { border-color: #BA7517; }
-  .stu-card.danger { border-color: #A32D2D; }
-  .stu-top { display: flex; align-items: center; gap: 8px; }
-  .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .stu-name { font-size: 13px; font-weight: 500; color: var(--text-primary); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tbadge { display: block; width: 100%; text-align: center; font-size: 13px; font-weight: 500; padding: 6px 10px; border-radius: 8px; white-space: nowrap; margin-top: 2px; }
-  .t0 { background: var(--bg-secondary); color: var(--text-tertiary); }
-  .t1 { background: #EAF3DE; color: #3B6D11; }
-  .t2 { background: #FAEEDA; color: #854F0B; }
-  .t3 { background: #FAECE7; color: #993C1D; }
-  .t4 { background: #E6F1FB; color: #0C447C; }
-
-  .stu-bottom { display: flex; align-items: center; gap: 6px; }
-  .bar-track { flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 9999px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 9999px; transition: width 0.3s, background 0.3s; }
-  .rpill { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 9999px; white-space: nowrap; flex-shrink: 0; }
-  .rp0 { background: var(--bg-secondary); color: var(--text-tertiary); }
-  .rp1 { background: #EAF3DE; color: #3B6D11; }
-  .rp2 { background: #FAEEDA; color: #854F0B; }
-  .rp3 { background: #FAECE7; color: #993C1D; }
-  .rp4 { background: #FCEBEB; color: #A32D2D; }
-
-  .btn-pm { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--border-mid); background: var(--bg-secondary); color: var(--text-secondary); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; font-family: inherit; }
-  .btn-pm:hover { background: var(--bg-tertiary); }
-  .btn-pm:disabled { opacity: 0.3; cursor: default; }
-  .btn-ret { font-size: 10px; padding: 4px 8px; border-radius: var(--radius-md); border: 0.5px solid #A32D2D; background: #FCEBEB; color: #A32D2D; cursor: pointer; font-weight: 500; flex-shrink: 0; font-family: inherit; }
-  .btn-ret:hover { background: #F7C1C1; }
-
-  .eleve-panel { background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 1.25rem; }
-  .eleve-name-display { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 14px; }
-  .tetra-btns { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
-  @media(max-width: 420px) { .tetra-btns { grid-template-columns: repeat(2,1fr); } }
-  .tetra-btn { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 14px 8px; text-align: center; cursor: pointer; background: var(--bg-primary); display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .tetra-btn.active { border-width: 2px; }
-  .tetra-btn .dot { width: 14px; height: 14px; border-radius: 50%; }
-  .tetra-btn .btn-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
-  .tetra-btn .btn-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.3; text-align: center; }
-  .status-current-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .status-current-row span { font-size: 13px; color: var(--text-secondary); }
-  .status-current-row strong { font-size: 14px; font-weight: 500; }
-
-  .warning-bar { background: #FCEBEB; border-radius: var(--radius-md); padding: 10px 14px; font-size: 12px; color: #A32D2D; margin-top: 1.25rem; line-height: 1.5; }
-
-  .no-alert { font-size: 13px; color: var(--text-tertiary); text-align: center; padding: 12px; font-style: italic; }
-
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
-  .modal-overlay.open { display: flex; }
-  .modal { background: var(--bg-primary); border-radius: var(--radius-lg); border: 0.5px solid var(--border-mid); padding: 1.25rem; width: 320px; max-width: 90vw; }
-  .modal h3 { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; }
-  .modal p { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem; }
-  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
-  .btn-cancel { font-size: 13px; padding: 6px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--border-mid); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
-  .btn-confirm { font-size: 13px; padding: 6px 12px; border-radius: var(--radius-md); background: #A32D2D; color: #FCEBEB; cursor: pointer; font-weight: 500; border: none; font-family: inherit; }
-
-  .email-preview { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 1rem; font-size: 12px; color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap; max-height: 180px; overflow-y: auto; border: 0.5px solid var(--border-light); }
-  .email-preview strong { color: var(--text-primary); }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .tab { padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border); font-size: 13px; cursor: pointer; background: var(--bg); color: var(--muted); }
+  .tab.active { background: var(--text); color: var(--bg); border-color: var(--text); font-weight: 500; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.25rem; }
+  .stat { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 8px; text-align: center; }
+  .stat-n { font-size: 20px; font-weight: 600; }
+  .stat-l { font-size: 11px; color: var(--muted); margin-top: 1px; }
+  .s-ok .stat-n { color: var(--green); }
+  .s-wait .stat-n { color: var(--amber); }
+  .s-help .stat-n { color: var(--red); }
+  .s-expert .stat-n { color: var(--blue); }
+  .section-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .help-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.25rem; }
+  .help-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--red-bg); border: 1px solid #F09595; border-radius: var(--radius-sm); font-size: 13px; color: var(--red-dark); }
+  .expert-pill { margin-left: auto; font-size: 11px; background: var(--blue-bg); color: var(--blue-dark); border: 1px solid #7AB800; border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
+  .sgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; margin-bottom: 1.25rem; }
+  .sc { border-radius: var(--radius-sm); border: 1px solid var(--border); padding: 7px 10px; font-size: 12px; font-weight: 500; background: var(--bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
+  .sc.s-ok { background: var(--green-bg); border-color: #5DCAA5; color: var(--green-dark); }
+  .sc.s-wait { background: var(--amber-bg); border-color: #EF9F27; color: var(--amber-dark); }
+  .sc.s-help { background: var(--red-bg); border-color: #F09595; color: var(--red-dark); }
+  .sc.s-expert { background: var(--blue-bg); border-color: #7AB800; color: var(--blue-dark); }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; flex-shrink: 0; }
+  .d-ok { background: var(--green); } .d-wait { background: var(--amber); } .d-help { background: var(--red); } .d-expert { background: var(--blue); } .d-absent { background: var(--gray); }
+  .reset-btn { font-size: 12px; color: var(--muted); cursor: pointer; border: 1px solid var(--border); background: var(--bg); border-radius: var(--radius-sm); padding: 4px 10px; }
+  .reset-btn:hover { background: var(--bg2); }
+  .row-between { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .warning-bar { font-size: 11px; color: var(--red-dark); background: var(--red-bg); border: 1px solid #F09595; border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 1rem; text-align: center; }
+  footer { text-align: center; padding: 2rem 1rem 1rem; font-size: 11px; color: #aaa; }
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="school">
-    <div class="school-name">Sainte Union de Kain</div>
-    <div class="school-sub">Cours d'informatique</div>
-  </div>
-  <div class="app-title">Tétra'aide</div>
-  <div class="app-sub" id="appSub"></div>
+<div class="container">
 
-  <div id="loginView">
-    <div class="login-box">
-      <h2>Connexion</h2>
-      <div class="login-error" id="loginError">Code incorrect, réessaie.</div>
-      <label>Classe</label>
-      <select id="loginClasse">
-        <option value="">Choisir ma classe...</option>
-        <option value="1Ca">1Ca</option>
-        <option value="1Cb">1Cb</option>
-        <option value="1Cc">1Cc</option>
-        <option value="1Cd">1Cd</option>
-        <option value="1De+2De">1De+2De</option>
-        <option value="2CC">2Cc</option>
-        <option value="3TQS1">3Tqs1</option>
-        <option value="3TQS2">3Tqs2</option>
-        <option value="4EQAE1">4EQAE1</option>
-        <option value="4EQAE2">4EQAE2</option>
-        <option value="PROF">Professeur</option>
-      </select>
-      <label>Code d'accès</label>
-      <input type="password" id="loginCode" placeholder="••••" onkeydown="if(event.key==='Enter')doLogin()">
-      <button onclick="doLogin()">Entrer</button>
-    </div>
+  <div style="text-align:center; padding: 0.5rem 0 1.5rem;">
+    <img src="logo_suk.jpg" alt="Logo école" style="height:60px; margin-bottom:8px; display:block; margin-left:auto; margin-right:auto;">
+    <p style="font-size:15px; font-weight:600; color:#1a1a18;">Sainte Union de Kain</p>
+    <p style="font-size:13px; color:#6b6a65;">Cours d'informatique</p>
   </div>
 
-  <div id="mainView" style="display:none">
-    <div class="topbar">
-      <div id="viewToggleWrap"></div>
-      <button class="btn-logout" onclick="doLogout()">Déconnexion</button>
-    </div>
-    <div id="syncIndicator" class="sync-indicator"></div>
-    <div class="classes" id="classes"></div>
+  <!-- ÉTAPE 1 : Choix de la classe -->
+  <div id="v-class" class="view active">
+    <h1>Trétr'aide</h1>
+    <p class="subtitle">Informatique — Choisis ta classe</p>
 
-    <div id="profView" style="display:none">
-      <div class="stats-row" id="statsRow"></div>
-      <div class="section-head">
-        <span class="section-lbl">TOUS LES ÉLÈVES</span>
-        <div class="section-actions">
-          <button class="btn-email" id="btnEmail" onclick="sendEmailReport()">
-            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="1" y="3" width="14" height="10" rx="2" stroke="#0C447C" stroke-width="1.2"/>
-              <path d="M1 5l7 5 7-5" stroke="#0C447C" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-            Envoyer rapport
-          </button>
-          <button class="btn-action" onclick="resetRemarks()">Réinitialiser les remarques</button>
+    <div style="margin: 0 0 1.25rem; border-radius: var(--radius); overflow: hidden; max-height: 200px;">
+      <img src="ChatGPT_tetraaide.png" alt="Trétr'aide en classe"
+        style="width:100%; height:200px; object-fit:cover; object-position: center 30%; display:block;">
+    </div>
+
+    <div class="step-indicator">
+      <div class="step active">1</div>
+      <div class="step-line"></div>
+      <span class="step-label">Classe</span>
+      <div class="step-line"></div>
+      <div class="step">2</div>
+      <div class="step-line"></div>
+      <span class="step-label">Nom &amp; statut</span>
+    </div>
+    <div class="card">
+      <p class="year-label">1ère année</p>
+      <div class="class-grid" id="grid-1ere"></div>
+      <p class="year-label">2ème année</p>
+      <div class="class-grid single" id="grid-2eme"></div>
+    </div>
+    <div class="switch-row">
+      <span class="link-btn" onclick="askProfPwd()">Vue professeur →</span>
+    </div>
+  </div>
+
+  <!-- MDP CLASSE -->
+  <div id="v-pwd-class" class="view">
+    <h1>Trétr'aide</h1>
+    <p class="subtitle" id="pwd-class-subtitle">Accès classe</p>
+    <div class="card">
+      <div class="pwd-wrap">
+        <p class="pwd-title" id="pwd-class-title">Code de la classe</p>
+        <p class="pwd-sub">Demande le code à ton professeur.</p>
+        <div class="pwd-input-row">
+          <input type="password" id="pwd-class-input" maxlength="10" placeholder="• • • •" onkeydown="if(event.key==='Enter') checkClassPwd()">
+          <button class="pwd-btn" onclick="checkClassPwd()">OK</button>
+        </div>
+        <p class="pwd-error" id="pwd-class-error">Code incorrect, réessaie.</p>
+        <p class="pwd-hint">Le code est mémorisé sur ce poste jusqu'au redémarrage.</p>
+      </div>
+    </div>
+    <div class="switch-row">
+      <span class="link-btn" onclick="switchTo('class')">← Retour</span>
+    </div>
+  </div>
+
+  <!-- MDP PROF -->
+  <div id="v-pwd-prof" class="view">
+    <h1>Trétr'aide</h1>
+    <p class="subtitle">Accès professeur</p>
+    <div class="card">
+      <div class="pwd-wrap">
+        <p class="pwd-title">Mot de passe professeur</p>
+        <p class="pwd-sub">Réservé à l'enseignant.</p>
+        <div class="pwd-input-row">
+          <input type="password" id="pwd-prof-input" maxlength="20" placeholder="• • • • • • •" onkeydown="if(event.key==='Enter') checkProfPwd()">
+          <button class="pwd-btn" onclick="checkProfPwd()">OK</button>
+        </div>
+        <p class="pwd-error" id="pwd-prof-error">Mot de passe incorrect.</p>
+      </div>
+    </div>
+    <div class="switch-row">
+      <span class="link-btn" onclick="switchTo('class')">← Retour</span>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2 : Nom + statut -->
+  <div id="v-student" class="view">
+    <h1>Trétr'aide</h1>
+    <p class="subtitle" id="student-subtitle">Informatique</p>
+    <div class="step-indicator">
+      <div class="step done">✓</div>
+      <div class="step-line"></div>
+      <span class="step-label">Classe</span>
+      <div class="step-line"></div>
+      <div class="step active">2</div>
+      <div class="step-line"></div>
+      <span class="step-label">Nom &amp; statut</span>
+    </div>
+    <div class="back-btn" onclick="switchTo('class')">← Changer de classe</div>
+    <div class="card">
+      <p class="names-label">Ton nom</p>
+      <div class="names-grid" id="names-grid"></div>
+    </div>
+    <div id="status-section" style="display:none;">
+      <div class="status-grid">
+        <div class="status-btn btn-ok" onclick="setStatus('ok')">
+          <span class="btn-icon">✓</span>
+          <div class="btn-label">Ça va</div>
+          <div class="btn-desc">Je travaille</div>
+        </div>
+        <div class="status-btn btn-wait" onclick="setStatus('wait')">
+          <span class="btn-icon">⏳</span>
+          <div class="btn-label">J'attends</div>
+          <div class="btn-desc">Je continue quand même</div>
+        </div>
+        <div class="status-btn btn-help" onclick="setStatus('help')">
+          <span class="btn-icon">!</span>
+          <div class="btn-label">Besoin d'aide</div>
+          <div class="btn-desc">Je reste sur ma tâche</div>
+        </div>
+        <div class="status-btn btn-expert" onclick="setStatus('expert')">
+          <span class="btn-icon">★</span>
+          <div class="btn-label">Je peux aider</div>
+          <div class="btn-desc">Disponible pour un pair</div>
         </div>
       </div>
-      <div class="students-grid" id="grid"></div>
+      <div class="status-bar" id="sbar">Aucun statut sélectionné</div>
     </div>
-
-    <div id="eleveView" style="display:none">
-      <div class="eleve-panel">
-        <div class="eleve-name-display" id="eleveNameDisplay"></div>
-        <div class="status-current-row">
-          <span>Mon statut :</span>
-          <strong id="currentStatusLabel" style="color:var(--text-secondary)">—</strong>
-        </div>
-        <div class="tetra-btns" id="tetraBtns"></div>
-      </div>
-    </div>
-
     <div class="warning-bar">
-      Toute utilisation abusive — changer le statut d'un camarade, usage non sérieux… — sera sanctionnée par un rapport sur Smartschool.
+      Toute utilisation abusive — changer le statut d'un camarade, usage non sérieux... — sera sanctionnée par un rapport sur Smartschool.
+    </div>
+    <div class="switch-row" style="margin-top:1rem;">
+      <span class="link-btn" onclick="askProfPwd()">Vue professeur →</span>
     </div>
   </div>
+
+  <!-- VUE PROF -->
+  <div id="v-prof" class="view">
+    <h1>Trétr'aide</h1>
+    <p class="subtitle">Vue professeur — Temps réel</p>
+    <div class="tabs" id="tabs"></div>
+    <div class="stats">
+      <div class="stat s-ok"><div class="stat-n" id="n-ok">0</div><div class="stat-l">OK</div></div>
+      <div class="stat s-wait"><div class="stat-n" id="n-wait">0</div><div class="stat-l">Attente</div></div>
+      <div class="stat s-help"><div class="stat-n" id="n-help">0</div><div class="stat-l">Aide</div></div>
+      <div class="stat s-expert"><div class="stat-n" id="n-expert">0</div><div class="stat-l">Expert</div></div>
+    </div>
+    <div id="help-wrap"></div>
+    <div class="row-between">
+      <span class="section-title">Tous les élèves</span>
+      <button class="reset-btn" onclick="resetClass()">Réinitialiser</button>
+    </div>
+    <div class="sgrid" id="sgrid"></div>
+    <div class="switch-row">
+      <span class="link-btn" onclick="switchTo('class')">← Vue élève</span>
+    </div>
+  </div>
+
 </div>
 
-<!-- Modal retenue -->
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <h3 id="mTitle"></h3>
-    <p id="mBody"></p>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">Annuler</button>
-      <button class="btn-confirm" onclick="confirmRet()">Confirmer la retenue</button>
-    </div>
-  </div>
-</div>
+<p style="font-size:11px; color:#A32D2D; background:#FCEBEB; border:1px solid #F09595; border-radius:6px; padding:10px 14px; margin: 0 1rem 1rem; text-align:center;">
+  Toute utilisation abusive — changer le statut d'un camarade, usage non sérieux... — sera sanctionnée par un rapport sur Smartschool.
+</p>
 
-<!-- Modal email -->
-<div class="modal-overlay" id="emailModal">
-  <div class="modal">
-    <h3>Envoyer le rapport</h3>
-    <p id="emailModalDesc" style="margin-bottom:8px"></p>
-    <div class="email-preview" id="emailPreview"></div>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeEmailModal()">Annuler</button>
-      <button class="btn-confirm" id="btnSendConfirm" onclick="confirmSendEmail()" style="background:#185FA5">Envoyer</button>
-    </div>
-  </div>
-</div>
+<footer>
+  Système conçu par <strong style="color:#888;">Grulois Michael</strong> — Professeur d'informatique<br>
+  Développé avec l'assistance de Claude (Anthropic) · 2025
+</footer>
 
 <script>
-// ═══════════════════════════════════════════
-// CONFIGURATION EMAILJS — À REMPLIR
-// ═══════════════════════════════════════════
-const EMAILJS_PUBLIC_KEY  = 'yzcgp5RUWiKKgBowi';    // ex: aBcDeFgHiJkL
-const EMAILJS_SERVICE_ID  = 'service_r2p8jyp';    // ex: service_xxxxxxx
-const EMAILJS_TEMPLATE_ID = 'template_ibobusq';   // ex: template_xxxxxxx
-const EMAIL_DESTINATAIRE  = 'a3d.contact@gmail.com'; // email fixe du destinataire
-// ═══════════════════════════════════════════
-
-const PASSWORDS = {
-  '1Ca':'1001','1Cb':'1002','1Cc':'1003','1Cd':'1004',
-  '1De+2De':'1000','2CC':'2003','3TQS1':'3001','3TQS2':'3002',
-  '4EQAE1':'4001','4EQAE2':'4002','PROF':'Grulo1s'
+const CLASSES_1 = {
+  "1Ca": ["Adonou Enam Fabiola","Blain Nathan","Delcroix Mia","Deprince Ethan","Dervaux Anthime","Dessoubrie Victor","Ferrand Mathias","Gares Elias","Galessi Anna","Koita Ylies","Leblanc Yohann","Mangain Noah","Mincke Izéline","Paunkovic Thyméo","Peeters Louy","Storari Raphaël","Suys Emy","Van Wymeersch Lucie","Vinchent Debliquy Capucine"],
+  "1Cb": ["Bascuñán Vande Maele David","Bernard Florian","Cange Marina","Chantry Arthur","Delneste Lalie","Druart Néo","Dubois Jérémie","Duhayon Vicky","Fontaine Mathéo","Fourmentez Nohan","Heusschen Noémie","Lechantre Jules","Lefevere Fien","Lefevere Theo","Loeuille Juliette","Pollet Ella","Racquet Loïs","Rivière Louis","Soudant Lucie"],
+  "1Cc": ["Becquereau Janis","Carpentier Maxim","Delbar Ayden","Detavernier Cyril","Detournay Jul","Evrard Gabin","Jansens Sasha","Kayigumire Mac","Lefebvre Brieuc","Lefebvre Léna","Leroy Ewen","Mazurel Mathis","Mignot Nina","Pierre Gabriel","Piron Henri","Rivez Lily","Rousseau Amalia","Spreux Giulia"],
+  "1Cd": ["Alexandre Enoä","Alkhatib Tamer","Boero Antoine","Charron Lenny","Degobert Mathieu","Delcourt Nathan","Delcourt Nolan","Droin Molly","Dubois Méganne","Goudaillier Sasha","Laurent Jeanne","Lenel Nathan","Mansour Inès","Menez Zélia","Muylle Aleyna","Terras Suzanne","Trouvilliers Robin","Brabant Aurélia"]
 };
 
-const ALL_STUDENTS = {
-  '1Ca':['Adonou Enam Fabiola','Blain Nathan','Delcroix Mia','Deprince Ethan','Dervaux Anthime','Dessoubrie Victor','Ferrand Mathias','Gares Elias','Galessi Anna','Koita Ylies','Leblanc Yohann','Mangain Noah','Mincke Izéline','Paunkovic Thyméo','Peeters Louy','Storari Raphaël','Suys Emy','Van Wymeersch Lucie','Vinchent Debliquy Capucine'],
-  '1Cb':['Bascuñán Vande Maele David','Bernard Florian','Cange Marina','Chantry Arthur','Delneste Lalie','Druart Néo','Dubois Jérémie','Duhayon Vicky','Fontaine Mathéo','Fourmentez Nohan','Heusschen Noémie','Lechantre Jules','Lefevere Fien','Lefevere Theo','Loeuille Juliette','Pollet Ella','Racquet Loïs','Rivière Louis','Soudant Lucie'],
-  '1Cc':['Becquereau Janis','Carpentier Maxim','Delbar Ayden','Detavernier Cyril','Detournay Jul','Evrard Gabin','Jansens Sasha','Kayigumire Mac','Lefebvre Brieuc','Lefebvre Léna','Leroy Ewen','Mazurel Mathis','Mignot Nina','Pierre Gabriel','Piron Henri','Rivez Lily','Rousseau Amalia','Spreux Giulia'],
-  '1Cd':['Alexandre Enoä','Alkhatib Tamer','Boero Antoine','Charron Lenny','Degobert Mathieu','Delcourt Nathan','Delcourt Nolan','Droin Molly','Dubois Méganne','Goudaillier Sasha','Laurent Jeanne','Lenel Nathan','Mansour Inès','Menez Zélia','Muylle Aleyna','Terras Suzanne','Trouvilliers Robin'],
-  '1De+2De':['Andrieu Leonie','Bernard Rafaël','Colpaert Eléa','Dewilde Loucas','Durieux Cathaliya','Gilson Matias','Gosselin Claudy','Haji Alexy','Horinque Tiago','Isenborghs Prescilla','Masquelier Tyméo','Pottier Léo','Scarton Clara','Soil Keurtys','Trenteseaux Célia'],
-  '2CC':['Baucamp Mathéo','Caudory Lise','Delhuvenne Gaspard','Ferrand Bastien','Hanon Emy','Hemeleers Esteban','Huys Maellys','Jouret Raphaël','Koscielniak Leeroy','Lansquenet Flavie','Lemoine Tom','Nottebaert Romain','Soens Emy','Vancraybeck Lola','Velghe Enola','Walravens Lily','Yannakis Naëlle'],
-  '3TQS1':['Bambiri Bang Mba Brunelle Cyrillia','Beniest Eloïse','Brillion Bao','Cardon Vince','Chais Aiden','Craeye Lenny','Cuvillier Mattéo','Dambrain Ines','Deleporte Chloé','Foucart Victor','Gilmet Lenny','Jamart Arwed','Lecat Flavie','Leghait Emilien','Legrain Jean','Lorthioir Elise','Parsy Celia','Roels Enzo','Soil Sahona','Vanderstraeten Hugo'],
-  '3TQS2':['Altruy Tim','Amissi Sophya','Camblain Helena','Christiaens Noa','Crowin Zia','Delgutte Jaden','Delonville Elowane','Delpierre Orlan','Droin Cilou','Galliez Raphaël','Komsi Bernard','Lainez Célia','Mahy Selène','Meuris Brice','Montegnies Adriano','Rousseau Timéo','Stocman Nina','Van Caenenberg Louanne','Vangénéberg Ambre','Vion Dubois Mahe'],
-  '4EQAE1':['Baisieux Milan','Bruni Erin','Callens Marie','Carette Enzo','Cheval Margaux','Debaisieux Anthéo','Delamballerie Kenza','Deroubaix Noé','Faignard Nélie','Huyghe Janelle','Lecomte Maxine','Leveau Elina','Meulemans Théo','Mulnard Clément','Schietse Arthur','Verhelst Ombeline'],
-  '4EQAE2':['Blomme Noah','Debouvries Nathan','De Clerck Rachel','Deffrasnes Emeline','Desauvage Thalia','Detournay Evi','Ducoron Louna','Duhayon Suzon','Duplat Florian','Haidon Laura','Hanna Tsoline','Lecocq Gabin','Leroy Aline','Plowy Eliot','Vanryckeghem Victor','Verrijdt Elia'],
+const CLASSES_2 = {
+  "1De+2De": ["Andrieu Leonie","Bernard Rafaël","Colpaert Eléa","Dewilde Loucas","Durieux Cathaliya","Gilson Matias","Gosselin Claudy","Haji Alexy","Horinque Tiago","Isenborghs Prescilla","Masquelier Tyméo","Pottier Léo","Scarton Clara","Soil Keurtys","Trenteseaux Célia","Durieux Arthur","Malbrancke Hamza"]
 };
 
-const CLASSE_LABELS = {'1Ca':'1Ca','1Cb':'1Cb','1Cc':'1Cc','1Cd':'1Cd','1De+2De':'1De+2De','2CC':'2Cc','3TQS1':'3Tqs1','3TQS2':'3Tqs2','4EQAE1':'4EQAE1','4EQAE2':'4EQAE2'};
-const ALL_CLASSES = Object.keys(ALL_STUDENTS);
+const ALL_CLASSES = Object.assign({}, CLASSES_1, CLASSES_2);
 
-const tetraColors=['#B4B2A9','#639922','#BA7517','#D85A30','#185FA5'];
-const tetraLabels=['—','OK','Attente','Aide','Expert'];
-const tetraBadgeClasses=['t0','t1','t2','t3','t4'];
-const tetraDescs=['','Je travaille, tout va bien.','J\'ai une question, j\'essaie quand même.','J\'ai besoin d\'aide maintenant.','J\'ai fini, je peux aider.'];
-const tetraActiveBg=['','#EAF3DE','#FAEEDA','#FAECE7','#E6F1FB'];
-const tetraActiveBorder=['','#3B6D11','#854F0B','#993C1D','#0C447C'];
+const CLASS_PWDS = {
+  "1Ca": "1001", "1Cb": "1002", "1Cc": "1003", "1Cd": "1004", "1De+2De": "1000"
+};
+const PROF_PWD = "Grulo1s";
 
-let currentRole=null, currentClasse=null, currentEleveName=null, activeClass=null, pendingId=null;
-let allData={};
-let emailPayload=null;
+const SL = { ok:"Ça va", wait:"J'attends", help:"Besoin d'aide", expert:"Je peux aider" };
+const DD = { ok:"d-ok", wait:"d-wait", help:"d-help", expert:"d-expert", absent:"d-absent" };
+const SS = { ok:"s-ok", wait:"s-wait", help:"s-help", expert:"s-expert" };
 
-try { emailjs.init(EMAILJS_PUBLIC_KEY); } catch(e) { console.error('EmailJS init error:', e); }
+let state = {};
+let curStudent = "";
+let curClass = Object.keys(ALL_CLASSES)[0];
+let pendingClass = "";
 
-function storageKey(c){ return 'tretraide-v3-'+c; }
+Object.entries(ALL_CLASSES).forEach(([cls, names]) => names.forEach(n => state[n] = "absent"));
 
-function loadClasse(c){
-  const names=ALL_STUDENTS[c]||[];
-  try{
-    const raw=localStorage.getItem(storageKey(c));
-    if(raw){
-      const saved=JSON.parse(raw);
-      return names.map((name,i)=>{
-        const s=saved.find(x=>x.name===name);
-        return {id:i+1,name,tetra:s?s.tetra||0:0,rem:s?s.rem||0:0};
-      });
+function isClassUnlocked(cls) { return sessionStorage.getItem("unlocked_" + cls) === "1"; }
+function unlockClass(cls) { sessionStorage.setItem("unlocked_" + cls, "1"); }
+function isProfUnlocked() { return sessionStorage.getItem("unlocked_prof") === "1"; }
+function unlockProf() { sessionStorage.setItem("unlocked_prof", "1"); }
+
+function makeClassBtn(cls, names, container) {
+  const btn = document.createElement("div");
+  btn.className = "class-btn";
+  const locked = !isClassUnlocked(cls);
+  btn.innerHTML = '<div class="cls-name">' + cls + (locked ? ' <span style="font-size:14px;">🔒</span>' : '') + '</div><div class="cls-count">' + names.length + ' élèves</div>';
+  btn.onclick = () => {
+    if (isClassUnlocked(cls)) {
+      openClass(cls);
+    } else {
+      pendingClass = cls;
+      document.getElementById("pwd-class-title").textContent = "Code pour " + cls;
+      document.getElementById("pwd-class-subtitle").textContent = "Accès — Classe " + cls;
+      document.getElementById("pwd-class-input").value = "";
+      document.getElementById("pwd-class-error").classList.remove("show");
+      switchTo("pwd-class");
+      setTimeout(() => document.getElementById("pwd-class-input").focus(), 100);
     }
-  }catch(e){}
-  return names.map((name,i)=>({id:i+1,name,tetra:0,rem:0}));
-}
-
-function setupFirebaseSync(){
-  if(!window.firebaseReady) return;
-  ALL_CLASSES.forEach(c=>{
-    window.firebaseRef(window.firebaseDB,'classes/'+c).on('value', (snapshot)=>{
-      const data = snapshot.val();
-      if(!data) return;
-      const names = ALL_STUDENTS[c]||[];
-      const dataArr = Array.isArray(data) ? data : Object.values(data);
-      const updated = names.map((name,i)=>{
-        const s = dataArr.find(x=>x&&x.name===name);
-        return {id:i+1, name, tetra:s?s.tetra||0:0, rem:s?s.rem||0:0};
-      });
-      const changed = JSON.stringify(updated) !== JSON.stringify(allData[c]);
-      allData[c] = updated;
-      try{localStorage.setItem(storageKey(c),JSON.stringify(allData[c]));}catch(e){}
-      if(changed && currentRole) render();
-    });
-  });
-  setSyncStatus('Synchronisé en temps réel ⚡','saved');
-}
-
-function saveClasse(c){
-  try{localStorage.setItem(storageKey(c),JSON.stringify(allData[c]));}catch(e){}
-  if(window.firebaseReady){
-    try{
-      window.firebaseRef(window.firebaseDB,'classes/'+c).set(allData[c]);
-    }catch(e){console.error('Firebase save error:',e);}
-  }
-}
-
-function doLogin(){
-  const classe=document.getElementById('loginClasse').value;
-  const code=document.getElementById('loginCode').value;
-  const err=document.getElementById('loginError');
-  if(!classe){err.style.display='block';err.textContent='Choisis ta classe.';return;}
-  if(PASSWORDS[classe]!==code){err.style.display='block';err.textContent='Code incorrect, réessaie.';return;}
-  err.style.display='none';
-  if(classe==='PROF'){currentRole='prof';startApp();}
-  else{currentRole='eleve';currentClasse=classe;askEleveName();}
-}
-
-function askEleveName(){
-  const students=ALL_STUDENTS[currentClasse]||[];
-  document.getElementById('loginView').innerHTML=`
-    <div class="login-box">
-      <h2>Qui es-tu ?</h2>
-      <label>Mon nom</label>
-      <select id="eleveNameSel">
-        <option value="">Choisir mon nom...</option>
-        ${students.map(n=>`<option value="${n}">${n}</option>`).join('')}
-      </select>
-      <div class="login-error" id="loginError2" style="display:none">Choisis ton nom.</div>
-      <button onclick="confirmEleveName()">Continuer</button>
-    </div>`;
-}
-
-function confirmEleveName(){
-  const sel=document.getElementById('eleveNameSel');
-  const err=document.getElementById('loginError2');
-  if(!sel.value){err.style.display='block';return;}
-  currentEleveName=sel.value;
-  startApp();
-}
-
-function startApp(){
-  ALL_CLASSES.forEach(c=>{allData[c]=loadClasse(c);});
-  activeClass=currentRole==='prof'?ALL_CLASSES[0]:currentClasse;
-  document.getElementById('loginView').style.display='none';
-  document.getElementById('mainView').style.display='';
-  if(currentRole==='prof'){
-    document.getElementById('appSub').textContent='Vue professeur — Temps réel';
-    document.getElementById('profView').style.display='';
-    document.getElementById('eleveView').style.display='none';
-  } else {
-    document.getElementById('appSub').textContent='Vue élève';
-    document.getElementById('profView').style.display='none';
-    document.getElementById('eleveView').style.display='';
-    document.getElementById('eleveNameDisplay').textContent=currentEleveName;
-  }
-  render();
-  if(window.firebaseReady){ setupFirebaseSync(); }
-  else { window.addEventListener('firebaseReady', setupFirebaseSync); }
-}
-
-function doLogout(){
-  currentRole=null;currentClasse=null;currentEleveName=null;activeClass=null;allData={};
-  document.getElementById('mainView').style.display='none';
-  document.getElementById('loginView').innerHTML=`
-    <div class="login-box">
-      <h2>Connexion</h2>
-      <div class="login-error" id="loginError">Code incorrect, réessaie.</div>
-      <label>Classe</label>
-      <select id="loginClasse">
-        <option value="">Choisir ma classe...</option>
-        <option value="1Ca">1Ca</option><option value="1Cb">1Cb</option>
-        <option value="1Cc">1Cc</option><option value="1Cd">1Cd</option>
-        <option value="1De+2De">1De+2De</option><option value="2CC">2Cc</option>
-        <option value="3TQS1">3Tqs1</option><option value="3TQS2">3Tqs2</option>
-        <option value="4EQAE1">4EQAE1</option><option value="4EQAE2">4EQAE2</option>
-        <option value="PROF">Professeur</option>
-      </select>
-      <label>Code d'accès</label>
-      <input type="password" id="loginCode" placeholder="••••" onkeydown="if(event.key==='Enter')doLogin()">
-      <button onclick="doLogin()">Entrer</button>
-    </div>`;
-  document.getElementById('loginView').style.display='';
-  document.getElementById('appSub').textContent='';
-}
-
-function remInfo(r){
-  if(r>=5)return{label:'Retenue',cls:'rp4',color:'#E24B4A',pct:100};
-  if(r===4)return{label:'Menace',cls:'rp3',color:'#D85A30',pct:80};
-  if(r===3)return{label:'Rapport',cls:'rp2',color:'#BA7517',pct:60};
-  if(r>=1)return{label:r+' rem.',cls:'rp1',color:'#639922',pct:r*20};
-  return{label:'—',cls:'rp0',color:'transparent',pct:0};
-}
-
-function setTetra(c,id,level){
-  const s=allData[c].find(x=>x.id===id);if(!s)return;
-  s.tetra=s.tetra===level?0:level;
-  saveClasse(c);render();
-}
-
-function addRem(id){const s=allData[activeClass].find(x=>x.id===id);if(s&&s.rem<5){s.rem++;saveClasse(activeClass);render();}}
-function subRem(id){const s=allData[activeClass].find(x=>x.id===id);if(s&&s.rem>0){s.rem--;saveClasse(activeClass);render();}}
-
-function openRet(id){
-  const s=allData[activeClass].find(x=>x.id===id);pendingId=id;
-  document.getElementById('mTitle').textContent='Retenue pour '+s.name+' ?';
-  document.getElementById('mBody').textContent='Cette action sera consignée dans le dossier ('+s.rem+' remarque'+(s.rem>1?'s':'')+').';
-  document.getElementById('modalOverlay').classList.add('open');
-}
-function closeModal(){document.getElementById('modalOverlay').classList.remove('open');pendingId=null;}
-function confirmRet(){if(pendingId!==null){allData[activeClass].find(x=>x.id===pendingId).rem=5;closeModal();saveClasse(activeClass);render();}}
-function resetRemarks(){allData[activeClass].forEach(s=>s.rem=0);saveClasse(activeClass);render();}
-
-function sendEmailReport(){
-  const students=allData[activeClass]||[];
-  const alertes=students.filter(s=>s.rem>=3);
-  const classe=CLASSE_LABELS[activeClass]||activeClass;
-  const now=new Date();
-  const dateStr=now.toLocaleDateString('fr-BE',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const heureStr=now.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
-
-  if(alertes.length===0){
-    setSyncStatus('Aucun élève à signaler dans cette classe.','saved');
-    setTimeout(()=>setSyncStatus('',''),3000);
-    return;
-  }
-
-  const lignes=alertes.map(s=>{
-    const sanction=s.rem>=5?'Retenue':s.rem===4?'Menace de retenue':'Rapport de comportement';
-    return `- ${s.name} : ${sanction}`;
-  }).join('\n');
-
-  const corps=`Classe : ${classe}\nDate : ${dateStr} à ${heureStr}\n\nÉlèves nécessitant une intervention :\n\n${lignes}\n\nEnvoyé depuis Tétra'aide — Sainte Union de Kain`;
-
-  emailPayload={
-    to_email: EMAIL_DESTINATAIRE,
-    subject: `[Tétra'aide] Rapport de comportement — ${classe} — ${dateStr}`,
-    message: corps,
-    classe: classe,
-    date: dateStr+' à '+heureStr,
   };
-
-  document.getElementById('emailModalDesc').textContent=
-    `${alertes.length} élève${alertes.length>1?'s':''} à signaler en ${classe} — envoi à ${EMAIL_DESTINATAIRE}`;
-  document.getElementById('emailPreview').textContent=corps;
-  document.getElementById('emailModal').classList.add('open');
+  container.appendChild(btn);
 }
 
-function closeEmailModal(){document.getElementById('emailModal').classList.remove('open');emailPayload=null;}
+function buildClassGrid() {
+  const g1 = document.getElementById("grid-1ere");
+  const g2 = document.getElementById("grid-2eme");
+  g1.innerHTML = ""; g2.innerHTML = "";
+  Object.entries(CLASSES_1).forEach(([cls, names]) => makeClassBtn(cls, names, g1));
+  Object.entries(CLASSES_2).forEach(([cls, names]) => makeClassBtn(cls, names, g2));
+}
 
-async function confirmSendEmail(){
-  if(!emailPayload)return;
-  const btn=document.getElementById('btnSendConfirm');
-  btn.disabled=true;btn.textContent='Envoi...';
-  setSyncStatus('Envoi en cours...','sending');
-  try{
-    console.log("Sending:", EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailPayload);
-    const result = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailPayload);
-    console.log("Result:", result);
-    closeEmailModal();
-    setSyncStatus('Email envoyé avec succès !','sent');
-    setTimeout(()=>setSyncStatus('',''),4000);
-  }catch(e){
-    const msg = e && e.text ? e.text : (e && e.message ? e.message : JSON.stringify(e));
-    setSyncStatus('Erreur : '+msg,'error');
-    alert('Erreur EmailJS :\n'+msg);
-    setTimeout(()=>setSyncStatus('',''),8000);
+function checkClassPwd() {
+  const input = document.getElementById("pwd-class-input").value;
+  if (input === CLASS_PWDS[pendingClass]) {
+    unlockClass(pendingClass);
+    openClass(pendingClass);
+  } else {
+    document.getElementById("pwd-class-error").classList.add("show");
+    document.getElementById("pwd-class-input").value = "";
+    document.getElementById("pwd-class-input").focus();
   }
-  btn.disabled=false;btn.textContent='Envoyer';
-  emailPayload=null;
 }
 
-function setSyncStatus(msg,type){
-  const el=document.getElementById('syncIndicator');
-  el.textContent=msg;
-  el.className='sync-indicator'+(type?' '+type:'');
+function openClass(cls) {
+  buildNamesGrid(cls);
+  document.getElementById("student-subtitle").textContent = "Informatique — Classe " + cls;
+  switchTo("student");
 }
 
-function renderClasses(){
-  const cl=document.getElementById('classes');cl.innerHTML='';
-  if(currentRole!=='prof'){cl.style.display='none';return;}
-  cl.style.display='';
-  ALL_CLASSES.forEach(c=>{
-    const b=document.createElement('button');
-    b.className='cls-btn'+(c===activeClass?' active':'');
-    b.textContent=CLASSE_LABELS[c]||c;
-    b.onclick=()=>{activeClass=c;render();};
-    cl.appendChild(b);
+function askProfPwd() {
+  if (isProfUnlocked()) {
+    switchTo("prof"); buildTabs(); renderProf();
+  } else {
+    document.getElementById("pwd-prof-input").value = "";
+    document.getElementById("pwd-prof-error").classList.remove("show");
+    switchTo("pwd-prof");
+    setTimeout(() => document.getElementById("pwd-prof-input").focus(), 100);
+  }
+}
+
+function checkProfPwd() {
+  const input = document.getElementById("pwd-prof-input").value;
+  if (input === PROF_PWD) {
+    unlockProf(); switchTo("prof"); buildTabs(); renderProf();
+  } else {
+    document.getElementById("pwd-prof-error").classList.add("show");
+    document.getElementById("pwd-prof-input").value = "";
+    document.getElementById("pwd-prof-input").focus();
+  }
+}
+
+function buildNamesGrid(cls) {
+  const grid = document.getElementById("names-grid");
+  grid.innerHTML = "";
+  curStudent = "";
+  document.getElementById("status-section").style.display = "none";
+  highlightBtn(null); updateBar(null);
+  ALL_CLASSES[cls].forEach(n => {
+    const btn = document.createElement("div");
+    btn.className = "name-btn" + (state[n] !== "absent" ? " sel" : "");
+    btn.textContent = n;
+    btn.onclick = () => {
+      curStudent = n;
+      document.querySelectorAll(".name-btn").forEach(b => b.classList.remove("sel"));
+      btn.classList.add("sel");
+      document.getElementById("status-section").style.display = "block";
+      const s = state[n];
+      if (s === "absent") { state[n] = "ok"; highlightBtn("ok"); updateBar("ok"); }
+      else { highlightBtn(s); updateBar(s); }
+    };
+    grid.appendChild(btn);
   });
 }
 
-function renderStats(){
-  const students=allData[activeClass]||[];
-  const counts=[0,0,0,0];
-  students.forEach(s=>{if(s.tetra>=1&&s.tetra<=4)counts[s.tetra-1]++;});
-  const statLabels=['OK','Attente','Aide','Expert'];
-  const statColors=['#639922','#BA7517','#D85A30','#185FA5'];
-  document.getElementById('statsRow').innerHTML=statLabels.map((l,i)=>
-    `<div class="stat-card"><div class="stat-num" style="color:${statColors[i]}">${counts[i]}</div><div class="stat-lbl">${l}</div></div>`
-  ).join('');
+function setStatus(s) {
+  if (!curStudent) return;
+  state[curStudent] = s; highlightBtn(s); updateBar(s);
 }
 
-function renderProfGrid(){
-  const students=allData[activeClass]||[];
-  const grid=document.getElementById('grid');grid.innerHTML='';
-  const alertes=students.filter(s=>s.rem>=3);
-  const btn=document.getElementById('btnEmail');
-  if(btn) btn.disabled=alertes.length===0;
+function highlightBtn(s) {
+  document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("sel"));
+  const m = { ok:"btn-ok", wait:"btn-wait", help:"btn-help", expert:"btn-expert" };
+  if (s && m[s]) document.querySelectorAll("." + m[s]).forEach(b => b.classList.add("sel"));
+}
 
-  students.forEach(s=>{
-    const ri=remInfo(s.rem);
-    const dotColor=tetraColors[s.tetra]||tetraColors[0];
-    const badge=tetraBadgeClasses[s.tetra]||'t0';
-    const label=tetraLabels[s.tetra]||'—';
-    const retBtn=s.rem>=3?`<button class="btn-ret" onclick="openRet(${s.id})">Retenue</button>`:'';
-    let cardExtra='';
-    if(s.rem>=5)cardExtra=' danger';
-    else if(s.rem>=3)cardExtra=' alert';
-    const card=document.createElement('div');card.className='stu-card'+cardExtra;
-    card.innerHTML=`
-      <div class="stu-top">
-        <div class="status-dot" style="background:${dotColor}"></div>
-        <span class="stu-name">${s.name}</span>
-      </div>
-      ${s.tetra > 0 ? `<span class="tbadge ${badge}">${label}</span>` : ''}
-      <div class="stu-bottom">
-        <div class="bar-track"><div class="bar-fill" style="width:${ri.pct}%;background:${ri.color}"></div></div>
-        <span class="rpill ${ri.cls}">${ri.label}</span>
-        ${retBtn}
-        <button class="btn-pm" onclick="subRem(${s.id})" ${s.rem===0?'disabled':''}>−</button>
-        <button class="btn-pm" onclick="addRem(${s.id})" ${s.rem>=5?'disabled':''}>+</button>
-      </div>`;
-    grid.appendChild(card);
+function updateBar(s) {
+  const bar = document.getElementById("sbar");
+  bar.textContent = s ? "Statut actuel : " + SL[s] : "Aucun statut sélectionné";
+  bar.className = "status-bar" + (s ? " active" : "");
+}
+
+function buildTabs() {
+  const wrap = document.getElementById("tabs");
+  wrap.innerHTML = "";
+  Object.keys(ALL_CLASSES).forEach(cls => {
+    const t = document.createElement("div");
+    t.className = "tab" + (cls === curClass ? " active" : "");
+    t.textContent = cls;
+    t.onclick = () => { curClass = cls; buildTabs(); renderProf(); };
+    wrap.appendChild(t);
   });
 }
 
-function renderElevePanel(){
-  const students=allData[currentClasse]||[];
-  const me=students.find(s=>s.name===currentEleveName);if(!me)return;
-  const curLevel=me.tetra;
-  const clbl=document.getElementById('currentStatusLabel');
-  clbl.textContent=tetraLabels[curLevel]||'—';
-  clbl.style.color=tetraColors[curLevel]||'var(--text-secondary)';
-  const btns=document.getElementById('tetraBtns');btns.innerHTML='';
-  [1,2,3,4].forEach(n=>{
-    const active=curLevel===n;
-    const btn=document.createElement('div');
-    btn.className='tetra-btn'+(active?' active':'');
-    if(active){btn.style.borderColor=tetraActiveBorder[n];btn.style.background=tetraActiveBg[n];}
-    btn.innerHTML=`<div class="dot" style="background:${tetraColors[n]}"></div><div class="btn-label" style="color:${active?tetraColors[n]:'var(--text-primary)'}">${tetraLabels[n]}</div><div class="btn-desc">${tetraDescs[n]}</div>`;
-    btn.onclick=()=>setTetra(currentClasse,me.id,n);
-    btns.appendChild(btn);
+function renderProf() {
+  const names = ALL_CLASSES[curClass];
+  const list = names.map(n => ({ name: n, status: state[n] || "absent" }));
+  const counts = { ok:0, wait:0, help:0, expert:0 };
+  list.forEach(s => { if (counts[s.status] !== undefined) counts[s.status]++; });
+  document.getElementById("n-ok").textContent = counts.ok;
+  document.getElementById("n-wait").textContent = counts.wait;
+  document.getElementById("n-help").textContent = counts.help;
+  document.getElementById("n-expert").textContent = counts.expert;
+
+  const experts = list.filter(s => s.status === "expert");
+  const needHelp = list.filter(s => s.status === "help");
+  const hw = document.getElementById("help-wrap");
+  if (needHelp.length) {
+    let h = '<p class="section-title">Besoin d\'aide (' + needHelp.length + ')</p><div class="help-list">';
+    needHelp.forEach((s, i) => {
+      const ex = experts[i % experts.length];
+      h += '<div class="help-row"><span class="dot d-help"></span>' + s.name;
+      if (ex) h += '<span class="expert-pill">★ ' + ex.name.split(" ")[0] + '</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+    hw.innerHTML = h;
+  } else { hw.innerHTML = ''; }
+
+  const grid = document.getElementById("sgrid");
+  grid.innerHTML = "";
+  list.forEach(s => {
+    const c = document.createElement("div");
+    c.className = "sc" + (SS[s.status] ? " " + SS[s.status] : "");
+    c.title = s.name;
+    c.innerHTML = '<span class="dot ' + DD[s.status] + '"></span>' + s.name;
+    grid.appendChild(c);
   });
 }
 
-function render(){
-  renderClasses();
-  if(currentRole==='prof'){renderStats();renderProfGrid();}
-  else{renderElevePanel();}
+function resetClass() {
+  ALL_CLASSES[curClass].forEach(n => { state[n] = "absent"; });
+  renderProf();
 }
+
+function switchTo(v) {
+  document.querySelectorAll(".view").forEach(el => el.classList.remove("active"));
+  document.getElementById("v-" + v).classList.add("active");
+  if (v === "class") buildClassGrid();
+}
+
+buildClassGrid();
+buildTabs();
+renderProf();
 </script>
 </body>
 </html>
