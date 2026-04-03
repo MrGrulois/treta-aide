@@ -121,6 +121,8 @@
   .btn-pm:disabled { opacity: 0.3; cursor: default; }
   .btn-ret { font-size: 10px; padding: 4px 8px; border-radius: var(--radius-md); border: 0.5px solid #A32D2D; background: #FCEBEB; color: #A32D2D; cursor: pointer; font-weight: 500; flex-shrink: 0; font-family: inherit; }
   .btn-ret:hover { background: #F7C1C1; }
+  .btn-reset-ok { font-size: 10px; padding: 4px 8px; border-radius: var(--radius-md); border: 0.5px solid #3B6D11; background: #EAF3DE; color: #3B6D11; cursor: pointer; font-weight: 500; flex-shrink: 0; font-family: inherit; }
+  .btn-reset-ok:hover { background: #C0DD97; }
 
   .eleve-panel { background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 1.25rem; }
   .eleve-name-display { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 14px; }
@@ -318,7 +320,7 @@ function loadClasse(c){
       });
     }
   }catch(e){}
-  return names.map((name,i)=>({id:i+1,name,tetra:0,rem:0}));
+  return names.map((name,i)=>({id:i+1,name,tetra:1,rem:0}));
 }
 
 function setupFirebaseSync(){
@@ -456,6 +458,7 @@ function openRet(id){
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');pendingId=null;}
 function confirmRet(){if(pendingId!==null){allData[activeClass].find(x=>x.id===pendingId).rem=5;closeModal();saveClasse(activeClass);render();}}
 function resetRemarks(){allData[activeClass].forEach(s=>s.rem=0);saveClasse(activeClass);render();}
+function resetToOk(id){const s=allData[activeClass].find(x=>x.id===id);if(s){s.tetra=1;saveClasse(activeClass);render();}}
 
 function sendEmailReport(){
   const students=allData[activeClass]||[];
@@ -558,7 +561,7 @@ function renderProfGrid(){
     const dotColor=tetraColors[s.tetra]||tetraColors[0];
     const badge=tetraBadgeClasses[s.tetra]||'t0';
     const label=tetraLabels[s.tetra]||'—';
-    const retBtn=s.rem>=3?`<button class="btn-ret" onclick="openRet(${s.id})">Retenue</button>`:'';
+    const retBtn=s.rem>=3?`<button class="btn-ret" onclick="openRet(${s.id})">Retenue</button>`:"";const resetBtn=`<button class="btn-reset-ok" onclick="resetToOk(${s.id})" title="Remettre en OK">✓ OK</button>`;
     let cardExtra='';
     if(s.rem>=5)cardExtra=' danger';
     else if(s.rem>=3)cardExtra=' alert';
@@ -572,7 +575,7 @@ function renderProfGrid(){
       <div class="stu-bottom">
         <div class="bar-track"><div class="bar-fill" style="width:${ri.pct}%;background:${ri.color}"></div></div>
         <span class="rpill ${ri.cls}">${ri.label}</span>
-        ${retBtn}
+        ${resetBtn} ${retBtn}
         <button class="btn-pm" onclick="subRem(${s.id})" ${s.rem===0?'disabled':''}>−</button>
         <button class="btn-pm" onclick="addRem(${s.id})" ${s.rem>=5?'disabled':''}>+</button>
       </div>`;
