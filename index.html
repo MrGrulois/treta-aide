@@ -167,6 +167,19 @@
   .email-preview { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 1rem; font-size: 12px; color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap; max-height: 180px; overflow-y: auto; border: 0.5px solid var(--border-light); }
   .email-preview strong { color: var(--text-primary); }
 
+  /* Modal motifs */
+  .modal-wide { width: 480px; max-width: 95vw; max-height: 88vh; overflow-y: auto; }
+  .motifs-eleve { margin-bottom: 14px; border: 0.5px solid var(--border-light); border-radius: var(--radius-md); padding: 10px 12px; background: var(--bg-secondary); }
+  .motifs-eleve-name { font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
+  .motifs-eleve-name .status-dot-sm { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .motifs-list { display: flex; flex-direction: column; gap: 5px; }
+  .motif-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .motif-item input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--text-primary); cursor: pointer; flex-shrink: 0; }
+  .motif-item label { font-size: 12px; color: var(--text-secondary); cursor: pointer; line-height: 1.4; }
+  .motif-item.checked label { color: var(--text-primary); font-weight: 500; }
+  .motifs-section-title { font-size: 11px; font-weight: 500; color: var(--text-tertiary); letter-spacing: 0.04em; margin-bottom: 10px; }
+
+
   .btn-toggle-rem { font-size: 12px; padding: 6px 12px; border-radius: var(--radius-md); border: 0.5px solid #639922; background: #EAF3DE; color: #3B6D11; cursor: pointer; font-family: inherit; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
   .btn-toggle-rem.hidden { border-color: var(--border-mid); background: var(--bg-secondary); color: var(--text-tertiary); }
   .eleve-rem-block { transition: opacity 0.3s; }
@@ -273,9 +286,22 @@
   </div>
 </div>
 
+<!-- Modal motifs -->
+<div class="modal-overlay" id="motifsModal">
+  <div class="modal modal-wide">
+    <h3>Motifs des rapports</h3>
+    <p class="motifs-section-title" id="motifsDesc" style="margin-bottom:12px"></p>
+    <div id="motifsList"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeMotifsModal()">Annuler</button>
+      <button class="btn-confirm" id="btnMotifsNext" onclick="openEmailFromMotifs()" style="background:#185FA5">Continuer →</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal email -->
 <div class="modal-overlay" id="emailModal">
-  <div class="modal">
+  <div class="modal modal-wide">
     <h3>Envoyer le rapport</h3>
     <p id="emailModalDesc" style="margin-bottom:8px"></p>
     <div class="email-preview" id="emailPreview"></div>
@@ -493,7 +519,66 @@ function confirmRet(){if(pendingId!==null){allData[activeClass].find(x=>x.id===p
 function resetRemarks(){allData[activeClass].forEach(s=>s.rem=0);saveClasse(activeClass);render();}
 function resetToOk(id){const s=allData[activeClass].find(x=>x.id===id);if(s){s.tetra=1;saveClasse(activeClass);render();}}
 
+const MOTIFS = [
+  'Parle au cours',
+  'Dérange son·sa voisin·e',
+  'Perturbe le cours en faisant du bruit inutile',
+  'Utilisation abusive de Trétr\'aide',
+  'Est violent·e',
+  'Irrespectueux·se',
+  'Lance des objets',
+  'Autre(s)'
+];
+
+let motifsData = {}; // { studentId: [motif1, motif2, ...] }
+
 function sendEmailReport(){
+  const students=allData[activeClass]||[];
+  const alertes=students.filter(s=>s.rem>=3);
+  if(alertes.length===0){
+    setSyncStatus('Aucun élève à signaler dans cette classe.','saved');
+    setTimeout(()=>setSyncStatus('',''),3000);
+    return;
+  }
+  // Ouvrir d'abord la modale des motifs
+  motifsData={};
+  alertes.forEach(s=>{ motifsData[s.id]=[]; });
+  const classe=CLASSE_LABELS[activeClass]||activeClass;
+  document.getElementById('motifsDesc').textContent=
+    `${alertes.length} élève${alertes.length>1?'s':''} en ${classe} — cochez les motifs`;
+  const list=document.getElementById('motifsList');
+  list.innerHTML='';
+  alertes.forEach(s=>{
+    const ri=remInfo(s.rem);
+    const dotColor=tetraColors[s.tetra]||tetraColors[0];
+    const block=document.createElement('div');
+    block.className='motifs-eleve';
+    block.innerHTML=`<div class="motifs-eleve-name">
+      <div class="status-dot-sm" style="background:${dotColor}"></div>
+      ${s.name} <span class="rpill ${ri.cls}" style="font-size:10px">${ri.label}</span>
+    </div>
+    <div class="motifs-list" id="motifs-${s.id}">
+      ${MOTIFS.map((m,i)=>`<label class="motif-item" id="motif-lbl-${s.id}-${i}">
+        <input type="checkbox" id="motif-${s.id}-${i}" onchange="onMotifChange(${s.id},${i},this.checked)">
+        <span>${m}</span>
+      </label>`).join('')}
+    </div>`;
+    list.appendChild(block);
+  });
+  document.getElementById('motifsModal').classList.add('open');
+}
+
+function onMotifChange(sid, idx, checked){
+  if(checked){ if(!motifsData[sid].includes(MOTIFS[idx])) motifsData[sid].push(MOTIFS[idx]); }
+  else { motifsData[sid]=motifsData[sid].filter(m=>m!==MOTIFS[idx]); }
+  const lbl=document.getElementById(`motif-lbl-${sid}-${idx}`);
+  if(lbl) lbl.className='motif-item'+(checked?' checked':'');
+}
+
+function closeMotifsModal(){ document.getElementById('motifsModal').classList.remove('open'); motifsData={}; }
+
+function openEmailFromMotifs(){
+  document.getElementById('motifsModal').classList.remove('open');
   const students=allData[activeClass]||[];
   const alertes=students.filter(s=>s.rem>=3);
   const classe=CLASSE_LABELS[activeClass]||activeClass;
@@ -501,15 +586,11 @@ function sendEmailReport(){
   const dateStr=now.toLocaleDateString('fr-BE',{day:'2-digit',month:'2-digit',year:'numeric'});
   const heureStr=now.toLocaleTimeString('fr-BE',{hour:'2-digit',minute:'2-digit'});
 
-  if(alertes.length===0){
-    setSyncStatus('Aucun élève à signaler dans cette classe.','saved');
-    setTimeout(()=>setSyncStatus('',''),3000);
-    return;
-  }
-
   const lignes=alertes.map(s=>{
     const sanction=s.rem>=5?'Retenue':s.rem===4?'Menace de retenue':'Rapport de comportement';
-    return `- ${s.name} : ${sanction}`;
+    const motifs=motifsData[s.id]||[];
+    const motifStr=motifs.length>0 ? '\n    Motifs : '+motifs.join(', ') : '';
+    return `- ${s.name} : ${sanction}${motifStr}`;
   }).join('\n');
 
   const corps=`Classe : ${classe}\nDate : ${dateStr} à ${heureStr}\n\nÉlèves nécessitant une intervention :\n\n${lignes}\n\nEnvoyé depuis Trétr'aide — Sainte Union de Kain`;
