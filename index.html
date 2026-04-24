@@ -166,6 +166,11 @@
 
   .email-preview { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 1rem; font-size: 12px; color: var(--text-secondary); line-height: 1.7; white-space: pre-wrap; max-height: 180px; overflow-y: auto; border: 0.5px solid var(--border-light); }
   .email-preview strong { color: var(--text-primary); }
+
+  .btn-toggle-rem { font-size: 12px; padding: 6px 12px; border-radius: var(--radius-md); border: 0.5px solid #639922; background: #EAF3DE; color: #3B6D11; cursor: pointer; font-family: inherit; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; }
+  .btn-toggle-rem.hidden { border-color: var(--border-mid); background: var(--bg-secondary); color: var(--text-tertiary); }
+  .eleve-rem-block { transition: opacity 0.3s; }
+
 </style>
 </head>
 <body>
@@ -230,6 +235,11 @@
           <button class="btn-action" onclick="resetRemarks()">Réinitialiser les remarques</button>
         </div>
       </div>
+      <div style="margin-bottom:10px;">
+        <button class="btn-toggle-rem" id="btnToggleRem" onclick="toggleShowRemarques()">
+          <span id="toggleRemIcon">👁</span> <span id="toggleRemLabel">Remarques visibles pour les élèves</span>
+        </button>
+      </div>
       <div class="students-grid" id="grid"></div>
     </div>
 
@@ -240,6 +250,7 @@
           <span>Mon statut :</span>
           <strong id="currentStatusLabel" style="color:var(--text-secondary)">—</strong>
         </div>
+        <div id="eleveRemBlock" style="display:none"></div>
         <div class="tetra-btns" id="tetraBtns"></div>
       </div>
     </div>
@@ -317,6 +328,7 @@ const tetraActiveBorder=['','#3B6D11','#854F0B','#993C1D','#0C447C'];
 let currentRole=null, currentClasse=null, currentEleveName=null, activeClass=null, pendingId=null;
 let allData={};
 let emailPayload=null;
+let showRemarques=true;
 
 try { emailjs.init(EMAILJS_PUBLIC_KEY); } catch(e) { console.error('EmailJS init error:', e); }
 
@@ -354,6 +366,13 @@ function setupFirebaseSync(){
       try{localStorage.setItem(storageKey(c),JSON.stringify(allData[c]));}catch(e){}
       if(changed && currentRole) render();
     });
+  });
+  // Sync du réglage remarques
+  window.firebaseRef(window.firebaseDB,'settings/showRemarques').on('value', (snap)=>{
+    const val = snap.val();
+    showRemarques = (val === null) ? true : val;
+    updateToggleBtn();
+    if(currentRole==='eleve') renderElevePanel();
   });
   setSyncStatus('Synchronisé en temps réel ⚡','saved');
 }
@@ -609,6 +628,22 @@ function renderElevePanel(){
   const clbl=document.getElementById('currentStatusLabel');
   clbl.textContent=tetraLabels[curLevel]||'—';
   clbl.style.color=tetraColors[curLevel]||'var(--text-secondary)';
+
+  // Affichage des remarques selon réglage prof
+  const remBlock=document.getElementById('eleveRemBlock');
+  if(remBlock){
+    if(showRemarques && me.rem>0){
+      const ri=remInfo(me.rem);
+      remBlock.style.display='';
+      remBlock.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:13px;color:var(--text-secondary);">Mes remarques :</span>
+        <span class="rpill ${ri.cls}" style="font-size:12px;padding:3px 9px;">${ri.label}</span>
+      </div>`;
+    } else {
+      remBlock.style.display='none';
+    }
+  }
+
   const btns=document.getElementById('tetraBtns');btns.innerHTML='';
   [1,2,3,4].forEach(n=>{
     const active=curLevel===n;
@@ -619,6 +654,30 @@ function renderElevePanel(){
     btn.onclick=()=>setTetra(currentClasse,me.id,n);
     btns.appendChild(btn);
   });
+}
+
+function toggleShowRemarques(){
+  showRemarques=!showRemarques;
+  if(window.firebaseReady){
+    window.firebaseRef(window.firebaseDB,'settings/showRemarques').set(showRemarques);
+  }
+  updateToggleBtn();
+}
+
+function updateToggleBtn(){
+  const btn=document.getElementById('btnToggleRem');
+  const icon=document.getElementById('toggleRemIcon');
+  const lbl=document.getElementById('toggleRemLabel');
+  if(!btn)return;
+  if(showRemarques){
+    btn.className='btn-toggle-rem';
+    icon.textContent='👁';
+    lbl.textContent='Remarques visibles pour les élèves';
+  } else {
+    btn.className='btn-toggle-rem hidden';
+    icon.textContent='🙈';
+    lbl.textContent='Remarques masquées pour les élèves';
+  }
 }
 
 function render(){
