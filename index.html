@@ -91,38 +91,52 @@
   .btn-email svg { width: 13px; height: 13px; flex-shrink: 0; }
 
   .students-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
-  @media(max-width: 520px) { .students-grid { grid-template-columns: 1fr; } .stats-row { grid-template-columns: repeat(2,1fr); } }
+  @media(max-width: 520px) {
+    .students-grid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 6px; }
+    .stats-row { grid-template-columns: repeat(2,1fr); }
+    .stu-name { font-size: 11px; }
+    .tbadge { font-size: 10px; padding: 3px 4px; }
+  }
 
-  .stu-card { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 10px 12px; background: var(--bg-primary); display: flex; flex-direction: column; gap: 7px; }
-  .stu-card.alert { border-color: #BA7517; }
-  .stu-card.danger { border-color: #A32D2D; }
-  .stu-top { display: flex; align-items: center; gap: 8px; }
-  .status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .stu-name { font-size: 13px; font-weight: 500; color: var(--text-primary); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tbadge { display: block; width: 100%; text-align: center; font-size: 13px; font-weight: 500; padding: 6px 10px; border-radius: 8px; white-space: nowrap; margin-top: 2px; }
+  .stu-card { border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 10px 12px; background: var(--bg-primary); display: flex; flex-direction: column; gap: 6px; }
+  .stu-card.alert { border-color: #BA7517; border-width: 1px; }
+  .stu-card.danger { border-color: #A32D2D; border-width: 1px; }
+  .stu-top { display: flex; align-items: center; gap: 7px; }
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .stu-name { font-size: 12px; font-weight: 500; color: var(--text-primary); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tbadge { display: block; width: 100%; text-align: center; font-size: 11px; font-weight: 500; padding: 4px 6px; border-radius: 6px; white-space: nowrap; }
   .t0 { background: var(--bg-secondary); color: var(--text-tertiary); }
   .t1 { background: #EAF3DE; color: #3B6D11; }
   .t2 { background: #FAEEDA; color: #854F0B; }
   .t3 { background: #FAECE7; color: #993C1D; }
   .t4 { background: #E6F1FB; color: #0C447C; }
 
-  .stu-bottom { display: flex; align-items: center; gap: 6px; }
-  .bar-track { flex: 1; height: 6px; background: var(--bg-tertiary); border-radius: 9999px; overflow: hidden; }
+  /* Barre de remarques */
+  .stu-rem-row { display: flex; align-items: center; gap: 5px; }
+  .bar-track { flex: 1; height: 5px; background: var(--bg-tertiary); border-radius: 9999px; overflow: hidden; }
   .bar-fill { height: 100%; border-radius: 9999px; transition: width 0.3s, background 0.3s; }
-  .rpill { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 9999px; white-space: nowrap; flex-shrink: 0; }
+  .rpill { font-size: 10px; font-weight: 500; padding: 2px 5px; border-radius: 9999px; white-space: nowrap; flex-shrink: 0; }
   .rp0 { background: var(--bg-secondary); color: var(--text-tertiary); }
   .rp1 { background: #EAF3DE; color: #3B6D11; }
   .rp2 { background: #FAEEDA; color: #854F0B; }
   .rp3 { background: #FAECE7; color: #993C1D; }
   .rp4 { background: #FCEBEB; color: #A32D2D; }
 
-  .btn-pm { width: 26px; height: 26px; border-radius: 50%; border: 0.5px solid var(--border-mid); background: var(--bg-secondary); color: var(--text-secondary); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; font-family: inherit; }
+  /* Boutons actions — rangée compacte */
+  .stu-actions { display: flex; align-items: center; justify-content: space-between; gap: 4px; flex-wrap: wrap; }
+  .stu-actions-left { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+  .stu-actions-right { display: flex; gap: 4px; flex-shrink: 0; }
+
+  .btn-pm { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid var(--border-mid); background: var(--bg-secondary); color: var(--text-secondary); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; font-family: inherit; touch-action: manipulation; }
   .btn-pm:hover { background: var(--bg-tertiary); }
   .btn-pm:disabled { opacity: 0.3; cursor: default; }
-  .btn-ret { font-size: 10px; padding: 4px 8px; border-radius: var(--radius-md); border: 0.5px solid #A32D2D; background: #FCEBEB; color: #A32D2D; cursor: pointer; font-weight: 500; flex-shrink: 0; font-family: inherit; }
+  .btn-ret { font-size: 10px; padding: 5px 7px; border-radius: var(--radius-md); border: 0.5px solid #A32D2D; background: #FCEBEB; color: #A32D2D; cursor: pointer; font-weight: 500; flex-shrink: 0; font-family: inherit; touch-action: manipulation; }
   .btn-ret:hover { background: #F7C1C1; }
-  .btn-reset-ok { font-size: 10px; padding: 4px 8px; border-radius: var(--radius-md); border: 0.5px solid #3B6D11; background: #EAF3DE; color: #3B6D11; cursor: pointer; font-weight: 500; flex-shrink: 0; font-family: inherit; }
+  .btn-reset-ok { font-size: 10px; padding: 5px 7px; border-radius: var(--radius-md); border: 0.5px solid #3B6D11; background: #EAF3DE; color: #3B6D11; cursor: pointer; font-weight: 500; flex-shrink: 0; font-family: inherit; touch-action: manipulation; }
   .btn-reset-ok:hover { background: #C0DD97; }
+
+  /* Compat ancien .stu-bottom si utilisé ailleurs */
+  .stu-bottom { display: flex; align-items: center; gap: 6px; }
 
   .eleve-panel { background: var(--bg-secondary); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 1.25rem; }
   .eleve-name-display { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 14px; }
@@ -561,7 +575,8 @@ function renderProfGrid(){
     const dotColor=tetraColors[s.tetra]||tetraColors[0];
     const badge=tetraBadgeClasses[s.tetra]||'t0';
     const label=tetraLabels[s.tetra]||'—';
-    const retBtn=s.rem>=3?`<button class="btn-ret" onclick="openRet(${s.id})">Retenue</button>`:"";const resetBtn=`<button class="btn-reset-ok" onclick="resetToOk(${s.id})" title="Remettre en OK">✓ OK</button>`;
+    const retBtn=s.rem>=3?`<button class="btn-ret" onclick="openRet(${s.id})">Ret.</button>`:"";
+    const resetBtn=`<button class="btn-reset-ok" onclick="resetToOk(${s.id})" title="Remettre en OK">✓ OK</button>`;
     let cardExtra='';
     if(s.rem>=5)cardExtra=' danger';
     else if(s.rem>=3)cardExtra=' alert';
@@ -572,12 +587,16 @@ function renderProfGrid(){
         <span class="stu-name">${s.name}</span>
       </div>
       ${s.tetra > 0 ? `<span class="tbadge ${badge}">${label}</span>` : ''}
-      <div class="stu-bottom">
+      <div class="stu-rem-row">
         <div class="bar-track"><div class="bar-fill" style="width:${ri.pct}%;background:${ri.color}"></div></div>
         <span class="rpill ${ri.cls}">${ri.label}</span>
-        ${resetBtn} ${retBtn}
-        <button class="btn-pm" onclick="subRem(${s.id})" ${s.rem===0?'disabled':''}>−</button>
-        <button class="btn-pm" onclick="addRem(${s.id})" ${s.rem>=5?'disabled':''}>+</button>
+      </div>
+      <div class="stu-actions">
+        <div class="stu-actions-left">${resetBtn}${retBtn}</div>
+        <div class="stu-actions-right">
+          <button class="btn-pm" onclick="subRem(${s.id})" ${s.rem===0?'disabled':''}>−</button>
+          <button class="btn-pm" onclick="addRem(${s.id})" ${s.rem>=5?'disabled':''}>+</button>
+        </div>
       </div>`;
     grid.appendChild(card);
   });
