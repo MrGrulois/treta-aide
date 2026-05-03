@@ -184,6 +184,14 @@
   .btn-toggle-rem.hidden { border-color: var(--border-mid); background: var(--bg-secondary); color: var(--text-tertiary); }
   .eleve-rem-block { transition: opacity 0.3s; }
 
+  /* Bon point */
+  .bp-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: 9999px; background: #FFF7D6; color: #8B6A00; border: 0.5px solid #E6C800; white-space: nowrap; flex-shrink: 0; }
+  .bp-badge.lit { background: #FFE94D; color: #6B4F00; border-color: #D4A800; }
+  .btn-bp { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid #D4A800; background: #FFF7D6; color: #8B6A00; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; font-family: inherit; touch-action: manipulation; }
+  .btn-bp:hover { background: #FFE94D; }
+  .btn-bp-minus { background: var(--bg-secondary); border-color: var(--border-mid); color: var(--text-tertiary); }
+  .btn-bp-minus:hover { background: var(--bg-tertiary); }
+
 </style>
 </head>
 <body>
@@ -368,7 +376,7 @@ function loadClasse(c){
       const saved=JSON.parse(raw);
       return names.map((name,i)=>{
         const s=saved.find(x=>x.name===name);
-        return {id:i+1,name,tetra:s?s.tetra||0:0,rem:s?s.rem||0:0};
+        return {id:i+1,name,tetra:s?s.tetra||0:0,rem:s?s.rem||0:0,bp:s?s.bp||0:0};
       });
     }
   }catch(e){}
@@ -385,7 +393,7 @@ function setupFirebaseSync(){
       const dataArr = Array.isArray(data) ? data : Object.values(data);
       const updated = names.map((name,i)=>{
         const s = dataArr.find(x=>x&&x.name===name);
-        return {id:i+1, name, tetra:s?s.tetra||0:0, rem:s?s.rem||0:0};
+        return {id:i+1, name, tetra:s?s.tetra||0:0, rem:s?s.rem||0:0, bp:s?s.bp||0:0};
       });
       const changed = JSON.stringify(updated) !== JSON.stringify(allData[c]);
       allData[c] = updated;
@@ -507,6 +515,8 @@ function setTetra(c,id,level){
 
 function addRem(id){const s=allData[activeClass].find(x=>x.id===id);if(s&&s.rem<5){s.rem++;saveClasse(activeClass);render();}}
 function subRem(id){const s=allData[activeClass].find(x=>x.id===id);if(s&&s.rem>0){s.rem--;saveClasse(activeClass);render();}}
+function addBp(id){const s=allData[activeClass].find(x=>x.id===id);if(s&&s.bp<99){s.bp=(s.bp||0)+1;saveClasse(activeClass);render();}}
+function subBp(id){const s=allData[activeClass].find(x=>x.id===id);if(s&&s.bp>0){s.bp--;saveClasse(activeClass);render();}}
 
 function openRet(id){
   const s=allData[activeClass].find(x=>x.id===id);pendingId=id;
@@ -516,7 +526,7 @@ function openRet(id){
 }
 function closeModal(){document.getElementById('modalOverlay').classList.remove('open');pendingId=null;}
 function confirmRet(){if(pendingId!==null){allData[activeClass].find(x=>x.id===pendingId).rem=5;closeModal();saveClasse(activeClass);render();}}
-function resetRemarks(){allData[activeClass].forEach(s=>s.rem=0);saveClasse(activeClass);render();}
+function resetRemarks(){allData[activeClass].forEach(s=>{s.rem=0;s.bp=0;});saveClasse(activeClass);render();}
 function resetToOk(id){const s=allData[activeClass].find(x=>x.id===id);if(s){s.tetra=1;saveClasse(activeClass);render();}}
 
 const MOTIFS = [
@@ -677,6 +687,9 @@ function renderProfGrid(){
     const label=tetraLabels[s.tetra]||'—';
     const retBtn=s.rem>=3?`<button class="btn-ret" onclick="openRet(${s.id})">Ret.</button>`:"";
     const resetBtn=`<button class="btn-reset-ok" onclick="resetToOk(${s.id})" title="Remettre en OK">✓ OK</button>`;
+    const bp=s.bp||0;
+    const bpLit=bp>=3;
+    const bpBadge=bp>0?`<span class="bp-badge${bpLit?' lit':''}">${bpLit?'✨':'⭐'} ${bp}</span>`:'';
     let cardExtra='';
     if(s.rem>=5)cardExtra=' danger';
     else if(s.rem>=3)cardExtra=' alert';
@@ -685,6 +698,7 @@ function renderProfGrid(){
       <div class="stu-top">
         <div class="status-dot" style="background:${dotColor}"></div>
         <span class="stu-name">${s.name}</span>
+        ${bpBadge}
       </div>
       ${s.tetra > 0 ? `<span class="tbadge ${badge}">${label}</span>` : ''}
       <div class="stu-rem-row">
@@ -694,6 +708,8 @@ function renderProfGrid(){
       <div class="stu-actions">
         <div class="stu-actions-left">${resetBtn}${retBtn}</div>
         <div class="stu-actions-right">
+          <button class="btn-bp btn-bp-minus" onclick="subBp(${s.id})" title="Retirer un bon point" ${bp===0?'disabled style="opacity:0.3;cursor:default"':''}>−</button>
+          <button class="btn-bp" onclick="addBp(${s.id})" title="Ajouter un bon point">⭐</button>
           <button class="btn-pm" onclick="subRem(${s.id})" ${s.rem===0?'disabled':''}>−</button>
           <button class="btn-pm" onclick="addRem(${s.id})" ${s.rem>=5?'disabled':''}>+</button>
         </div>
@@ -713,16 +729,24 @@ function renderElevePanel(){
   // Affichage des remarques selon réglage prof
   const remBlock=document.getElementById('eleveRemBlock');
   if(remBlock){
+    const bp=me.bp||0;
+    let html='';
     if(showRemarques && me.rem>0){
       const ri=remInfo(me.rem);
-      remBlock.style.display='';
-      remBlock.innerHTML=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <span style="font-size:13px;color:var(--text-secondary);">Mes remarques :</span>
         <span class="rpill ${ri.cls}" style="font-size:12px;padding:3px 9px;">${ri.label}</span>
       </div>`;
-    } else {
-      remBlock.style.display='none';
     }
+    if(bp>0){
+      const bpLit=bp>=3;
+      html+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:13px;color:var(--text-secondary);">Mes bons points :</span>
+        <span class="bp-badge${bpLit?' lit':''}" style="font-size:12px;padding:3px 9px;">${bpLit?'✨':'⭐'} ${bp}</span>
+      </div>`;
+    }
+    if(html){ remBlock.style.display=''; remBlock.innerHTML=html; }
+    else { remBlock.style.display='none'; }
   }
 
   const btns=document.getElementById('tetraBtns');btns.innerHTML='';
