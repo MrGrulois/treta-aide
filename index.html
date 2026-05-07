@@ -51,13 +51,42 @@
   .app-title { font-size: 22px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
   .app-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 1rem; }
 
-  .login-box { background: var(--bg-primary); border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 2rem; max-width: 360px; margin: 2rem auto; }
+  .login-box { background: var(--bg-primary); border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 2rem; max-width: 400px; margin: 2rem auto; }
   .login-box h2 { font-size: 16px; font-weight: 500; color: var(--text-primary); margin-bottom: 1.25rem; text-align: center; }
   .login-box label { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
   .login-box select, .login-box input { width: 100%; font-size: 14px; padding: 8px 10px; border: 0.5px solid var(--border-mid); border-radius: var(--radius-md); background: var(--bg-primary); color: var(--text-primary); font-family: inherit; margin-bottom: 12px; }
-  .login-box button { width: 100%; font-size: 14px; font-weight: 500; padding: 10px; border-radius: var(--radius-md); border: none; background: var(--text-primary); color: #fff; cursor: pointer; font-family: inherit; }
-  .login-box button:hover { opacity: 0.88; }
+  .login-box button.btn-primary { width: 100%; font-size: 14px; font-weight: 500; padding: 10px; border-radius: var(--radius-md); border: none; background: var(--text-primary); color: #fff; cursor: pointer; font-family: inherit; }
+  .login-box button.btn-primary:hover { opacity: 0.88; }
   .login-error { font-size: 12px; color: #A32D2D; background: #FCEBEB; border-radius: var(--radius-md); padding: 8px 10px; margin-bottom: 10px; display: none; }
+
+  /* Onboarding — tuiles rôle */
+  .role-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 400px; margin: 2rem auto; }
+  .role-tile { background: var(--bg-primary); border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 2rem 1rem; text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 10px; transition: border-color 0.15s, box-shadow 0.15s; }
+  .role-tile:hover { border-color: var(--border-mid); box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  .role-tile .tile-icon { font-size: 36px; line-height: 1; }
+  .role-tile .tile-label { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+  .role-tile .tile-sub { font-size: 11px; color: var(--text-tertiary); }
+  .role-tile.eleve:hover { border-color: #185FA5; }
+  .role-tile.prof:hover { border-color: #3B6D11; }
+
+  /* Sélecteurs boutons */
+  .onboard-box { background: var(--bg-primary); border: 0.5px solid var(--border-light); border-radius: var(--radius-lg); padding: 1.5rem; max-width: 400px; margin: 2rem auto; }
+  .onboard-box h2 { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+  .onboard-box .onboard-sub { font-size: 12px; color: var(--text-tertiary); margin-bottom: 1.25rem; }
+  .btn-back { font-size: 12px; color: var(--text-tertiary); background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; margin-bottom: 1rem; display: flex; align-items: center; gap: 4px; }
+  .btn-back:hover { color: var(--text-secondary); }
+  .pick-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pick-btn { font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: var(--radius-md); border: 0.5px solid var(--border-mid); background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-family: inherit; transition: background 0.12s, border-color 0.12s; }
+  .pick-btn:hover { background: var(--bg-tertiary); border-color: var(--text-primary); }
+  .pick-btn.pick-prof { border-color: #3B6D11; background: #EAF3DE; color: #3B6D11; }
+  .pick-btn.pick-prof:hover { background: #C0DD97; }
+  .pick-name-grid { display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+  .pick-name-btn { font-size: 13px; padding: 9px 14px; border-radius: var(--radius-md); border: 0.5px solid var(--border-light); background: var(--bg-secondary); color: var(--text-primary); cursor: pointer; font-family: inherit; text-align: left; transition: background 0.1s; }
+  .pick-name-btn:hover { background: var(--bg-tertiary); border-color: var(--border-mid); }
+  .code-input-wrap { margin-top: 1rem; }
+  .code-input-wrap input { width: 100%; font-size: 18px; letter-spacing: 6px; text-align: center; padding: 10px; border: 0.5px solid var(--border-mid); border-radius: var(--radius-md); font-family: inherit; background: var(--bg-primary); color: var(--text-primary); margin-bottom: 10px; }
+  .code-input-wrap button { width: 100%; font-size: 14px; font-weight: 500; padding: 10px; border-radius: var(--radius-md); border: none; background: var(--text-primary); color: #fff; cursor: pointer; font-family: inherit; }
+  .code-input-wrap button:hover { opacity: 0.88; }
 
   .topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 0.5rem; }
   .btn-logout { font-size: 12px; padding: 5px 12px; border-radius: var(--radius-md); border: 0.5px solid var(--border-mid); background: var(--bg-primary); color: var(--text-secondary); cursor: pointer; font-family: inherit; }
@@ -209,27 +238,17 @@
   <div class="app-sub" id="appSub"></div>
 
   <div id="loginView">
-    <div class="login-box">
-      <h2>Connexion</h2>
-      <div class="login-error" id="loginError">Code incorrect, réessaie.</div>
-      <label>Classe</label>
-      <select id="loginClasse">
-        <option value="">Choisir ma classe...</option>
-        <option value="1Ca">1Ca</option>
-        <option value="1Cb">1Cb</option>
-        <option value="1Cc">1Cc</option>
-        <option value="1Cd">1Cd</option>
-        <option value="1De+2De">1De+2De</option>
-        <option value="2CC">2Cc</option>
-        <option value="3TQS1">3Tqs1</option>
-        <option value="3TQS2">3Tqs2</option>
-        <option value="4EQAE1">4EQAE1</option>
-        <option value="4EQAE2">4EQAE2</option>
-        <option value="PROF">Professeur</option>
-      </select>
-      <label>Code d'accès</label>
-      <input type="password" id="loginCode" placeholder="••••" onkeydown="if(event.key==='Enter')doLogin()">
-      <button onclick="doLogin()">Entrer</button>
+    <div class="role-tiles">
+      <div class="role-tile eleve" onclick="showEleveClasses()">
+        <div class="tile-icon">🎓</div>
+        <div class="tile-label">Je suis étudiant·e</div>
+        <div class="tile-sub">Accéder à mon statut</div>
+      </div>
+      <div class="role-tile prof" onclick="showProfList()">
+        <div class="tile-icon">👨‍🏫</div>
+        <div class="tile-label">Je suis professeur</div>
+        <div class="tile-sub">Vue de classe</div>
+      </div>
     </div>
   </div>
 
@@ -420,43 +439,160 @@ function saveClasse(c){
   }
 }
 
-function doLogin(){
-  const classe=document.getElementById('loginClasse').value;
-  const code=document.getElementById('loginCode').value;
-  const err=document.getElementById('loginError');
-  if(!classe){err.style.display='block';err.textContent='Choisis ta classe.';return;}
-  if(PASSWORDS[classe]!==code){err.style.display='block';err.textContent='Code incorrect, réessaie.';return;}
-  err.style.display='none';
-  if(classe==='PROF'){currentRole='prof';startApp();}
-  else{currentRole='eleve';currentClasse=classe;askEleveName();}
+// ═══════════════════════════════
+// FLUX DE CONNEXION — BOUTONS
+// ═══════════════════════════════
+
+const PROFS = [
+  { id: 'grulois', name: 'Grulois Michael', password: 'Grulo1s',
+    classes: ['1Ca','1Cb','1Cc','1Cd','1De+2De','2CC','3TQS1','3TQS2','4EQAE1','4EQAE2'] }
+];
+
+function setLoginView(html){
+  document.getElementById('loginView').innerHTML = html;
 }
 
-function askEleveName(){
-  const students=ALL_STUDENTS[currentClasse]||[];
-  document.getElementById('loginView').innerHTML=`
-    <div class="login-box">
+function showEleveClasses(){
+  const btns = ALL_CLASSES.map(c =>
+    `<button class="pick-btn" onclick="showEleveNames('${c}')">${CLASSE_LABELS[c]||c}</button>`
+  ).join('');
+  setLoginView(`
+    <div class="onboard-box">
+      <button class="btn-back" onclick="showRoleTiles()">← Retour</button>
+      <h2>Ma classe</h2>
+      <p class="onboard-sub">Clique sur ta classe</p>
+      <div class="pick-grid">${btns}</div>
+    </div>`);
+}
+
+function showEleveNames(classe){
+  currentClasse = classe;
+  const students = ALL_STUDENTS[classe]||[];
+  const btns = students.map(n =>
+    `<button class="pick-name-btn" onclick="selectEleveName('${n.replace(/'/g,"\\'")}')"> ${n}</button>`
+  ).join('');
+  setLoginView(`
+    <div class="onboard-box">
+      <button class="btn-back" onclick="showEleveClasses()">← Retour</button>
       <h2>Qui es-tu ?</h2>
-      <label>Mon nom</label>
-      <select id="eleveNameSel">
-        <option value="">Choisir mon nom...</option>
-        ${students.map(n=>`<option value="${n}">${n}</option>`).join('')}
-      </select>
-      <div class="login-error" id="loginError2" style="display:none">Choisis ton nom.</div>
-      <button onclick="confirmEleveName()">Continuer</button>
-    </div>`;
+      <p class="onboard-sub">Classe ${CLASSE_LABELS[classe]||classe} — clique sur ton nom</p>
+      <div class="pick-name-grid">${btns}</div>
+    </div>`);
 }
 
-function confirmEleveName(){
-  const sel=document.getElementById('eleveNameSel');
-  const err=document.getElementById('loginError2');
-  if(!sel.value){err.style.display='block';return;}
-  currentEleveName=sel.value;
+function selectEleveName(name){
+  currentEleveName = name;
+  // Demander le code de la classe avant de lancer l'app
+  setLoginView(`
+    <div class="onboard-box">
+      <button class="btn-back" onclick="showEleveNames('${currentClasse}')">← Retour</button>
+      <h2>Code de la classe</h2>
+      <p class="onboard-sub">Connecté·e en tant que <strong>${name}</strong> — ${CLASSE_LABELS[currentClasse]||currentClasse}</p>
+      <div id="loginError" class="login-error">Code incorrect, réessaie.</div>
+      <div class="code-input-wrap">
+        <input type="password" id="eleveCodeInput" placeholder="••••" autocomplete="off"
+          onkeydown="if(event.key==='Enter')confirmEleveCode()">
+        <button onclick="confirmEleveCode()">Entrer</button>
+      </div>
+    </div>`);
+  setTimeout(()=>{ const el=document.getElementById('eleveCodeInput'); if(el)el.focus(); },100);
+}
+
+function confirmEleveCode(){
+  const val = (document.getElementById('eleveCodeInput')||{}).value||'';
+  const err = document.getElementById('loginError');
+  if(PASSWORDS[currentClasse] !== val){
+    if(err){ err.style.display='block'; err.textContent='Code incorrect, réessaie.'; }
+    return;
+  }
+  currentRole = 'eleve';
   startApp();
 }
 
+function showProfList(){
+  const btns = PROFS.map(p =>
+    `<button class="pick-btn pick-prof" onclick="showProfCode('${p.id}')">${p.name}</button>`
+  ).join('');
+  setLoginView(`
+    <div class="onboard-box">
+      <button class="btn-back" onclick="showRoleTiles()">← Retour</button>
+      <h2>Quel professeur ?</h2>
+      <p class="onboard-sub">Clique sur ton nom</p>
+      <div class="pick-grid">${btns}</div>
+    </div>`);
+}
+
+function showProfCode(profId){
+  setLoginView(`
+    <div class="onboard-box">
+      <button class="btn-back" onclick="showProfList()">← Retour</button>
+      <h2>Code professeur</h2>
+      <p class="onboard-sub">Entrez votre code d'accès</p>
+      <div id="loginError" class="login-error">Code incorrect, réessaie.</div>
+      <div class="code-input-wrap">
+        <input type="password" id="profCodeInput" placeholder="••••" autocomplete="off"
+          onkeydown="if(event.key==='Enter')confirmProfCode('${profId}')">
+        <button onclick="confirmProfCode('${profId}')">Entrer</button>
+      </div>
+    </div>`);
+  setTimeout(()=>{ const el=document.getElementById('profCodeInput'); if(el)el.focus(); },100);
+}
+
+function confirmProfCode(profId){
+  const prof = PROFS.find(p=>p.id===profId);
+  const val = (document.getElementById('profCodeInput')||{}).value||'';
+  const err = document.getElementById('loginError');
+  if(!prof || val !== prof.password){
+    if(err){ err.style.display='block'; err.textContent='Code incorrect, réessaie.'; }
+    return;
+  }
+  // Code OK — montrer les classes du prof en boutons
+  const btns = prof.classes.map(c =>
+    `<button class="pick-btn" onclick="selectProfClass('${c}')">${CLASSE_LABELS[c]||c}</button>`
+  ).join('');
+  setLoginView(`
+    <div class="onboard-box">
+      <h2>Bonjour, ${prof.name.split(' ')[0]} 👋</h2>
+      <p class="onboard-sub">Quelle classe ce cours ?</p>
+      <div class="pick-grid">${btns}</div>
+    </div>`);
+}
+
+function selectProfClass(classe){
+  currentRole = 'prof';
+  activeClass = classe;
+  startApp();
+}
+
+function showRoleTiles(){
+  setLoginView(`
+    <div class="role-tiles">
+      <div class="role-tile eleve" onclick="showEleveClasses()">
+        <div class="tile-icon">🎓</div>
+        <div class="tile-label">Je suis étudiant·e</div>
+        <div class="tile-sub">Accéder à mon statut</div>
+      </div>
+      <div class="role-tile prof" onclick="showProfList()">
+        <div class="tile-icon">👨‍🏫</div>
+        <div class="tile-label">Je suis professeur</div>
+        <div class="tile-sub">Vue de classe</div>
+      </div>
+    </div>`);
+}
+
+// Ancienne fonction doLogin conservée pour compatibilité (non utilisée)
+function doLogin(){}
+
+function askEleveName(){}
+function confirmEleveName(){}
+
 function startApp(){
   ALL_CLASSES.forEach(c=>{allData[c]=loadClasse(c);});
-  activeClass=currentRole==='prof'?ALL_CLASSES[0]:currentClasse;
+  if(currentRole==='prof'){
+    if(!activeClass) activeClass=ALL_CLASSES[0];
+  } else {
+    activeClass=currentClasse;
+  }
   document.getElementById('loginView').style.display='none';
   document.getElementById('mainView').style.display='';
   if(currentRole==='prof'){
@@ -477,25 +613,8 @@ function startApp(){
 function doLogout(){
   currentRole=null;currentClasse=null;currentEleveName=null;activeClass=null;allData={};
   document.getElementById('mainView').style.display='none';
-  document.getElementById('loginView').innerHTML=`
-    <div class="login-box">
-      <h2>Connexion</h2>
-      <div class="login-error" id="loginError">Code incorrect, réessaie.</div>
-      <label>Classe</label>
-      <select id="loginClasse">
-        <option value="">Choisir ma classe...</option>
-        <option value="1Ca">1Ca</option><option value="1Cb">1Cb</option>
-        <option value="1Cc">1Cc</option><option value="1Cd">1Cd</option>
-        <option value="1De+2De">1De+2De</option><option value="2CC">2Cc</option>
-        <option value="3TQS1">3Tqs1</option><option value="3TQS2">3Tqs2</option>
-        <option value="4EQAE1">4EQAE1</option><option value="4EQAE2">4EQAE2</option>
-        <option value="PROF">Professeur</option>
-      </select>
-      <label>Code d'accès</label>
-      <input type="password" id="loginCode" placeholder="••••" onkeydown="if(event.key==='Enter')doLogin()">
-      <button onclick="doLogin()">Entrer</button>
-    </div>`;
   document.getElementById('loginView').style.display='';
+  showRoleTiles();
   document.getElementById('appSub').textContent='';
 }
 
