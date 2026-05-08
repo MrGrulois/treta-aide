@@ -4,252 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TetraLink — Sainte Union de Kain</title>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js">
-// ═══════════════════════════════
-// NAVIGATION ONGLETS PROF
-// ═══════════════════════════════
-let currentProfTab = 'classe';
-
-function switchProfTab(tab){
-  currentProfTab = tab;
-  document.getElementById('tabClasse').className = 'nav-tab' + (tab==='classe'?' active':'');
-  document.getElementById('tabStats').className  = 'nav-tab' + (tab==='stats'?' active':'');
-  document.getElementById('profView').style.display  = tab==='classe' ? '' : 'none';
-  document.getElementById('statsView').style.display = tab==='stats'  ? '' : 'none';
-  if(tab==='stats') renderStatsPage();
-}
-
-// ═══════════════════════════════
-// PAGE STATISTIQUES
-// ═══════════════════════════════
-let statsHistorique = {}; // cache local
-
-async function loadHistorique(){
-  if(!window.firebaseReady) return {};
-  return new Promise(resolve => {
-    window.firebaseRef(window.firebaseDB, 'historique').once('value', snap => {
-      resolve(snap.val() || {});
-    });
-  });
-}
-
-async function renderStatsPage(){
-  const el = document.getElementById('statsPageContent');
-  el.innerHTML = '<p class="empty-state">Chargement…</p>';
-  statsHistorique = await loadHistorique();
-
-  el.innerHTML = `
-    <div class="nav-tabs" style="margin-bottom:1.5rem">
-      <button class="nav-tab active" id="stab-evol"  onclick="showStatTab('evol')">📈 Évolution élève</button>
-      <button class="nav-tab"        id="stab-comp"  onclick="showStatTab('comp')">🏫 Classes</button>
-      <button class="nav-tab"        id="stab-top"   onclick="showStatTab('top')">🏆 Tops</button>
-    </div>
-    <div id="statTabContent"></div>`;
-  showStatTab('evol');
-}
-
-function showStatTab(tab){
-  ['evol','comp','top'].forEach(t => {
-    const b = document.getElementById('stab-'+t);
-    if(b) b.className = 'nav-tab' + (t===tab?' active':'');
-  });
-  const c = document.getElementById('statTabContent');
-  if(!c) return;
-  if(tab==='evol') renderEvolTab(c);
-  if(tab==='comp') renderCompTab(c);
-  if(tab==='top')  renderTopTab(c);
-}
-
-// ── Tab évolution d'un élève ──────────────────────────────────────────────
-function renderEvolTab(container){
-  // Construire liste de tous les élèves (depuis allData)
-  const opts = ALL_CLASSES.flatMap(c =>
-    (allData[c]||[]).map(s => `<option value="${c}|||${s.name}">${s.name} (${CLASSE_LABELS[c]||c})</option>`)
-  ).join('');
-
-  container.innerHTML = `
-    <div class="stats-section">
-      <div class="stats-section-title">Sélectionner un·e élève</div>
-      <select class="stat-select" id="evolSelect" onchange="renderEvolChart()">
-        <option value="">— Choisir —</option>${opts}
-      </select>
-      <div id="evolChartArea"></div>
-    </div>`;
-}
-
-function renderEvolChart(){
-  const val = document.getElementById('evolSelect').value;
-  const area = document.getElementById('evolChartArea');
-  if(!val){ area.innerHTML=''; return; }
-  const [classe, name] = val.split('|||');
-
-  // Récupérer les entrées historiques pour cet élève dans cette classe
-  const classeHisto = statsHistorique[classe] || {};
-  const dates = Object.keys(classeHisto).sort();
-  const points = dates.map(d => {
-    const snap = classeHisto[d];
-    const entry = Object.values(snap).find(e => e.name === name);
-    return { date: d, rem: entry ? entry.rem||0 : 0, bp: entry ? entry.bp||0 : 0 };
-  });
-
-  if(!points.length){
-    area.innerHTML = '<p class="empty-state">Aucun historique disponible pour cet élève.<br>L'historique se constitue à chaque réinitialisation de cours.</p>';
-    return;
-  }
-
-  // KPIs
-  const totalRem = points.reduce((a,p)=>a+p.rem,0);
-  const totalBp  = points.reduce((a,p)=>a+p.bp,0);
-  const nbCours  = points.length;
-
-  // SVG sparkline
-  const W=320, H=80, padL=8, padR=8, padT=10, padB=10;
-  const maxVal = Math.max(5, ...points.map(p=>Math.max(p.rem,p.bp)), 1);
-  const x = i => padL + (i/(Math.max(points.length-1,1)))*(W-padL-padR);
-  const y = v => padT + (1 - v/maxVal)*(H-padT-padB);
-
-  const remPath = points.map((p,i)=>(i===0?'M':'L')+x(i).toFixed(1)+','+y(p.rem).toFixed(1)).join(' ');
-  const bpPath  = points.map((p,i)=>(i===0?'M':'L')+x(i).toFixed(1)+','+y(p.bp).toFixed(1)).join(' ');
-
-  const dots = points.map((p,i)=>
-    `<circle cx="${x(i).toFixed(1)}" cy="${y(p.rem).toFixed(1)}" r="3" fill="#A32D2D" title="${p.date}: ${p.rem} rem"/>
-     <circle cx="${x(i).toFixed(1)}" cy="${y(p.bp).toFixed(1)}"  r="3" fill="#D4A800" title="${p.date}: ${p.bp} bp"/>`
-  ).join('');
-
-  const labels = points.length<=8 ? points.map((p,i)=>`<text x="${x(i).toFixed(1)}" y="${H+4}" text-anchor="middle" font-size="8" fill="var(--text-tertiary)">${p.date.slice(5,10)}</text>`).join('') : '';
-
-  area.innerHTML = `
-    <div class="kpi-row">
-      <div class="kpi-card"><div class="kpi-val">${nbCours}</div><div class="kpi-lbl">Cours archivés</div></div>
-      <div class="kpi-card"><div class="kpi-val" style="color:#A32D2D">${totalRem}</div><div class="kpi-lbl">Remarques totales</div></div>
-      <div class="kpi-card"><div class="kpi-val" style="color:#8B6A00">${totalBp}</div><div class="kpi-lbl">Bons points totaux</div></div>
-    </div>
-    <div class="chart-wrap">
-      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:6px;display:flex;gap:14px">
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#A32D2D;display:inline-block;border-radius:2px"></span> Remarques</span>
-        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#D4A800;display:inline-block;border-radius:2px"></span> Bons points</span>
-      </div>
-      <svg viewBox="0 0 ${W} ${H+14}" width="100%" style="max-width:${W}px">
-        <path d="${remPath}" stroke="#A32D2D" stroke-width="1.5" fill="none"/>
-        <path d="${bpPath}"  stroke="#D4A800" stroke-width="1.5" fill="none"/>
-        ${dots}
-        ${labels}
-      </svg>
-    </div>`;
-}
-
-// ── Tab comparaison classes ───────────────────────────────────────────────
-function renderCompTab(container){
-  const data = ALL_CLASSES.map(c => {
-    const classeHisto = statsHistorique[c] || {};
-    const sessions = Object.values(classeHisto);
-    let totalRem=0, totalBp=0, nbSessions=sessions.length;
-    sessions.forEach(snap => {
-      Object.values(snap).forEach(e => { totalRem+=e.rem||0; totalBp+=e.bp||0; });
-    });
-    const nbEleves = (allData[c]||[]).length;
-    return { classe: CLASSE_LABELS[c]||c, totalRem, totalBp, nbSessions, nbEleves,
-             avgRem: nbEleves&&nbSessions ? (totalRem/(nbEleves*nbSessions)).toFixed(2) : '—',
-             avgBp:  nbEleves&&nbSessions ? (totalBp /(nbEleves*nbSessions)).toFixed(2) : '—' };
-  });
-
-  const maxRem = Math.max(...data.map(d=>d.totalRem), 1);
-  const maxBp  = Math.max(...data.map(d=>d.totalBp),  1);
-
-  const rows = data.map(d => `<tr>
-    <td><strong>${d.classe}</strong></td>
-    <td>${d.nbSessions}</td>
-    <td>
-      <span class="comp-bar" style="width:${Math.round(d.totalRem/maxRem*80)}px;background:#F7C1C1"></span>
-      <span style="font-size:11px;margin-left:4px;color:#A32D2D">${d.totalRem}</span>
-    </td>
-    <td>
-      <span class="comp-bar" style="width:${Math.round(d.totalBp/maxBp*80)}px;background:#FFE94D"></span>
-      <span style="font-size:11px;margin-left:4px;color:#8B6A00">${d.totalBp}</span>
-    </td>
-    <td style="color:var(--text-secondary)">${d.avgRem}</td>
-    <td style="color:var(--text-secondary)">${d.avgBp}</td>
-  </tr>`).join('');
-
-  container.innerHTML = `
-    <div class="stats-section">
-      <div class="stats-section-title">Toutes les classes — données cumulées</div>
-      <div style="overflow-x:auto">
-        <table class="comp-table">
-          <thead><tr>
-            <th>Classe</th><th>Cours</th><th>Rem. totales</th><th>BP totaux</th><th>Rem./élève/cours</th><th>BP/élève/cours</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-      ${data.every(d=>d.nbSessions===0) ? '<p class="empty-state" style="margin-top:12px">Aucun historique encore. Il se constituera à chaque fin de cours (bouton Réinitialiser).</p>' : ''}
-    </div>`;
-}
-
-// ── Tab tops ─────────────────────────────────────────────────────────────
-function renderTopTab(container){
-  // Agréger tous les élèves toutes classes confondues
-  const map = {}; // key = "Nom|||Classe"
-  ALL_CLASSES.forEach(c => {
-    const classeHisto = statsHistorique[c] || {};
-    Object.values(classeHisto).forEach(snap => {
-      Object.values(snap).forEach(e => {
-        const key = e.name+'|||'+(CLASSE_LABELS[c]||c);
-        if(!map[key]) map[key] = { name: e.name, classe: CLASSE_LABELS[c]||c, rem:0, bp:0, sessions:0 };
-        map[key].rem += e.rem||0;
-        map[key].bp  += e.bp||0;
-        map[key].sessions++;
-      });
-    });
-  });
-
-  const all = Object.values(map);
-  if(!all.length){
-    container.innerHTML = '<p class="empty-state">Aucun historique disponible.<br>Les tops se construisent au fil des cours.</p>';
-    return;
-  }
-
-  const topRem = [...all].sort((a,b)=>b.rem-a.rem).slice(0,5);
-  const topBp  = [...all].sort((a,b)=>b.bp-a.bp).slice(0,5);
-  // Irréguliers = ont des bons points ET des remarques (ratio)
-  const topIrr = [...all].filter(e=>e.rem>0&&e.bp>0).sort((a,b)=>(b.rem+b.bp)-(a.rem+a.bp)).slice(0,5);
-
-  const rankEmoji = ['🥇','🥈','🥉','4.','5.'];
-
-  const listRem = topRem.map((e,i)=>`<div class="top-item">
-    <span class="top-rank">${rankEmoji[i]}</span>
-    <span class="top-name">${e.name} <span style="font-size:10px;color:var(--text-tertiary)">${e.classe}</span></span>
-    <span class="top-val rem">${e.rem} rem.</span>
-  </div>`).join('');
-
-  const listBp = topBp.map((e,i)=>`<div class="top-item">
-    <span class="top-rank">${rankEmoji[i]}</span>
-    <span class="top-name">${e.name} <span style="font-size:10px;color:var(--text-tertiary)">${e.classe}</span></span>
-    <span class="top-val bp">⭐ ${e.bp}</span>
-  </div>`).join('');
-
-  const listIrr = topIrr.length ? topIrr.map((e,i)=>`<div class="top-item">
-    <span class="top-rank">${rankEmoji[i]}</span>
-    <span class="top-name">${e.name} <span style="font-size:10px;color:var(--text-tertiary)">${e.classe}</span></span>
-    <span class="top-val irr">${e.bp}⭐ / ${e.rem}⚠️</span>
-  </div>`).join('') : '<p class="empty-state">Aucun élève avec les deux à la fois.</p>';
-
-  container.innerHTML = `
-    <div class="stats-section">
-      <div class="stats-section-title">🔴 Top remarques (cumulées)</div>
-      <div class="top-list">${listRem||'<p class="empty-state">—</p>'}</div>
-    </div>
-    <div class="stats-section">
-      <div class="stats-section-title">⭐ Top bons points (cumulés)</div>
-      <div class="top-list">${listBp||'<p class="empty-state">—</p>'}</div>
-    </div>
-    <div class="stats-section">
-      <div class="stats-section-title">⚠️ Profils irréguliers — bon travail mais comportement difficile</div>
-      <div class="top-list">${listIrr}</div>
-    </div>`;
-}
-
-</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
@@ -1344,6 +1099,252 @@ function render(){
   if(currentRole==='prof'){renderStats();renderProfGrid();renderStatsTable();}
   else{renderElevePanel();}
 }
+
+
+// ═══════════════════════════════
+// NAVIGATION ONGLETS PROF
+// ═══════════════════════════════
+let currentProfTab = 'classe';
+
+function switchProfTab(tab){
+  currentProfTab = tab;
+  document.getElementById('tabClasse').className = 'nav-tab' + (tab==='classe'?' active':'');
+  document.getElementById('tabStats').className  = 'nav-tab' + (tab==='stats'?' active':'');
+  document.getElementById('profView').style.display  = tab==='classe' ? '' : 'none';
+  document.getElementById('statsView').style.display = tab==='stats'  ? '' : 'none';
+  if(tab==='stats') renderStatsPage();
+}
+
+// ═══════════════════════════════
+// PAGE STATISTIQUES
+// ═══════════════════════════════
+let statsHistorique = {}; // cache local
+
+async function loadHistorique(){
+  if(!window.firebaseReady) return {};
+  return new Promise(resolve => {
+    window.firebaseRef(window.firebaseDB, 'historique').once('value', snap => {
+      resolve(snap.val() || {});
+    });
+  });
+}
+
+async function renderStatsPage(){
+  const el = document.getElementById('statsPageContent');
+  el.innerHTML = '<p class="empty-state">Chargement…</p>';
+  statsHistorique = await loadHistorique();
+
+  el.innerHTML = `
+    <div class="nav-tabs" style="margin-bottom:1.5rem">
+      <button class="nav-tab active" id="stab-evol"  onclick="showStatTab('evol')">📈 Évolution élève</button>
+      <button class="nav-tab"        id="stab-comp"  onclick="showStatTab('comp')">🏫 Classes</button>
+      <button class="nav-tab"        id="stab-top"   onclick="showStatTab('top')">🏆 Tops</button>
+    </div>
+    <div id="statTabContent"></div>`;
+  showStatTab('evol');
+}
+
+function showStatTab(tab){
+  ['evol','comp','top'].forEach(t => {
+    const b = document.getElementById('stab-'+t);
+    if(b) b.className = 'nav-tab' + (t===tab?' active':'');
+  });
+  const c = document.getElementById('statTabContent');
+  if(!c) return;
+  if(tab==='evol') renderEvolTab(c);
+  if(tab==='comp') renderCompTab(c);
+  if(tab==='top')  renderTopTab(c);
+}
+
+// ── Tab évolution d'un élève ──────────────────────────────────────────────
+function renderEvolTab(container){
+  // Construire liste de tous les élèves (depuis allData)
+  const opts = ALL_CLASSES.flatMap(c =>
+    (allData[c]||[]).map(s => `<option value="${c}|||${s.name}">${s.name} (${CLASSE_LABELS[c]||c})</option>`)
+  ).join('');
+
+  container.innerHTML = `
+    <div class="stats-section">
+      <div class="stats-section-title">Sélectionner un·e élève</div>
+      <select class="stat-select" id="evolSelect" onchange="renderEvolChart()">
+        <option value="">— Choisir —</option>${opts}
+      </select>
+      <div id="evolChartArea"></div>
+    </div>`;
+}
+
+function renderEvolChart(){
+  const val = document.getElementById('evolSelect').value;
+  const area = document.getElementById('evolChartArea');
+  if(!val){ area.innerHTML=''; return; }
+  const [classe, name] = val.split('|||');
+
+  // Récupérer les entrées historiques pour cet élève dans cette classe
+  const classeHisto = statsHistorique[classe] || {};
+  const dates = Object.keys(classeHisto).sort();
+  const points = dates.map(d => {
+    const snap = classeHisto[d];
+    const entry = Object.values(snap).find(e => e.name === name);
+    return { date: d, rem: entry ? entry.rem||0 : 0, bp: entry ? entry.bp||0 : 0 };
+  });
+
+  if(!points.length){
+    area.innerHTML = '<p class="empty-state">Aucun historique disponible pour cet élève.<br>L'historique se constitue à chaque réinitialisation de cours.</p>';
+    return;
+  }
+
+  // KPIs
+  const totalRem = points.reduce((a,p)=>a+p.rem,0);
+  const totalBp  = points.reduce((a,p)=>a+p.bp,0);
+  const nbCours  = points.length;
+
+  // SVG sparkline
+  const W=320, H=80, padL=8, padR=8, padT=10, padB=10;
+  const maxVal = Math.max(5, ...points.map(p=>Math.max(p.rem,p.bp)), 1);
+  const x = i => padL + (i/(Math.max(points.length-1,1)))*(W-padL-padR);
+  const y = v => padT + (1 - v/maxVal)*(H-padT-padB);
+
+  const remPath = points.map((p,i)=>(i===0?'M':'L')+x(i).toFixed(1)+','+y(p.rem).toFixed(1)).join(' ');
+  const bpPath  = points.map((p,i)=>(i===0?'M':'L')+x(i).toFixed(1)+','+y(p.bp).toFixed(1)).join(' ');
+
+  const dots = points.map((p,i)=>
+    `<circle cx="${x(i).toFixed(1)}" cy="${y(p.rem).toFixed(1)}" r="3" fill="#A32D2D" title="${p.date}: ${p.rem} rem"/>
+     <circle cx="${x(i).toFixed(1)}" cy="${y(p.bp).toFixed(1)}"  r="3" fill="#D4A800" title="${p.date}: ${p.bp} bp"/>`
+  ).join('');
+
+  const labels = points.length<=8 ? points.map((p,i)=>`<text x="${x(i).toFixed(1)}" y="${H+4}" text-anchor="middle" font-size="8" fill="var(--text-tertiary)">${p.date.slice(5,10)}</text>`).join('') : '';
+
+  area.innerHTML = `
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-val">${nbCours}</div><div class="kpi-lbl">Cours archivés</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:#A32D2D">${totalRem}</div><div class="kpi-lbl">Remarques totales</div></div>
+      <div class="kpi-card"><div class="kpi-val" style="color:#8B6A00">${totalBp}</div><div class="kpi-lbl">Bons points totaux</div></div>
+    </div>
+    <div class="chart-wrap">
+      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:6px;display:flex;gap:14px">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#A32D2D;display:inline-block;border-radius:2px"></span> Remarques</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:3px;background:#D4A800;display:inline-block;border-radius:2px"></span> Bons points</span>
+      </div>
+      <svg viewBox="0 0 ${W} ${H+14}" width="100%" style="max-width:${W}px">
+        <path d="${remPath}" stroke="#A32D2D" stroke-width="1.5" fill="none"/>
+        <path d="${bpPath}"  stroke="#D4A800" stroke-width="1.5" fill="none"/>
+        ${dots}
+        ${labels}
+      </svg>
+    </div>`;
+}
+
+// ── Tab comparaison classes ───────────────────────────────────────────────
+function renderCompTab(container){
+  const data = ALL_CLASSES.map(c => {
+    const classeHisto = statsHistorique[c] || {};
+    const sessions = Object.values(classeHisto);
+    let totalRem=0, totalBp=0, nbSessions=sessions.length;
+    sessions.forEach(snap => {
+      Object.values(snap).forEach(e => { totalRem+=e.rem||0; totalBp+=e.bp||0; });
+    });
+    const nbEleves = (allData[c]||[]).length;
+    return { classe: CLASSE_LABELS[c]||c, totalRem, totalBp, nbSessions, nbEleves,
+             avgRem: nbEleves&&nbSessions ? (totalRem/(nbEleves*nbSessions)).toFixed(2) : '—',
+             avgBp:  nbEleves&&nbSessions ? (totalBp /(nbEleves*nbSessions)).toFixed(2) : '—' };
+  });
+
+  const maxRem = Math.max(...data.map(d=>d.totalRem), 1);
+  const maxBp  = Math.max(...data.map(d=>d.totalBp),  1);
+
+  const rows = data.map(d => `<tr>
+    <td><strong>${d.classe}</strong></td>
+    <td>${d.nbSessions}</td>
+    <td>
+      <span class="comp-bar" style="width:${Math.round(d.totalRem/maxRem*80)}px;background:#F7C1C1"></span>
+      <span style="font-size:11px;margin-left:4px;color:#A32D2D">${d.totalRem}</span>
+    </td>
+    <td>
+      <span class="comp-bar" style="width:${Math.round(d.totalBp/maxBp*80)}px;background:#FFE94D"></span>
+      <span style="font-size:11px;margin-left:4px;color:#8B6A00">${d.totalBp}</span>
+    </td>
+    <td style="color:var(--text-secondary)">${d.avgRem}</td>
+    <td style="color:var(--text-secondary)">${d.avgBp}</td>
+  </tr>`).join('');
+
+  container.innerHTML = `
+    <div class="stats-section">
+      <div class="stats-section-title">Toutes les classes — données cumulées</div>
+      <div style="overflow-x:auto">
+        <table class="comp-table">
+          <thead><tr>
+            <th>Classe</th><th>Cours</th><th>Rem. totales</th><th>BP totaux</th><th>Rem./élève/cours</th><th>BP/élève/cours</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      ${data.every(d=>d.nbSessions===0) ? '<p class="empty-state" style="margin-top:12px">Aucun historique encore. Il se constituera à chaque fin de cours (bouton Réinitialiser).</p>' : ''}
+    </div>`;
+}
+
+// ── Tab tops ─────────────────────────────────────────────────────────────
+function renderTopTab(container){
+  // Agréger tous les élèves toutes classes confondues
+  const map = {}; // key = "Nom|||Classe"
+  ALL_CLASSES.forEach(c => {
+    const classeHisto = statsHistorique[c] || {};
+    Object.values(classeHisto).forEach(snap => {
+      Object.values(snap).forEach(e => {
+        const key = e.name+'|||'+(CLASSE_LABELS[c]||c);
+        if(!map[key]) map[key] = { name: e.name, classe: CLASSE_LABELS[c]||c, rem:0, bp:0, sessions:0 };
+        map[key].rem += e.rem||0;
+        map[key].bp  += e.bp||0;
+        map[key].sessions++;
+      });
+    });
+  });
+
+  const all = Object.values(map);
+  if(!all.length){
+    container.innerHTML = '<p class="empty-state">Aucun historique disponible.<br>Les tops se construisent au fil des cours.</p>';
+    return;
+  }
+
+  const topRem = [...all].sort((a,b)=>b.rem-a.rem).slice(0,5);
+  const topBp  = [...all].sort((a,b)=>b.bp-a.bp).slice(0,5);
+  // Irréguliers = ont des bons points ET des remarques (ratio)
+  const topIrr = [...all].filter(e=>e.rem>0&&e.bp>0).sort((a,b)=>(b.rem+b.bp)-(a.rem+a.bp)).slice(0,5);
+
+  const rankEmoji = ['🥇','🥈','🥉','4.','5.'];
+
+  const listRem = topRem.map((e,i)=>`<div class="top-item">
+    <span class="top-rank">${rankEmoji[i]}</span>
+    <span class="top-name">${e.name} <span style="font-size:10px;color:var(--text-tertiary)">${e.classe}</span></span>
+    <span class="top-val rem">${e.rem} rem.</span>
+  </div>`).join('');
+
+  const listBp = topBp.map((e,i)=>`<div class="top-item">
+    <span class="top-rank">${rankEmoji[i]}</span>
+    <span class="top-name">${e.name} <span style="font-size:10px;color:var(--text-tertiary)">${e.classe}</span></span>
+    <span class="top-val bp">⭐ ${e.bp}</span>
+  </div>`).join('');
+
+  const listIrr = topIrr.length ? topIrr.map((e,i)=>`<div class="top-item">
+    <span class="top-rank">${rankEmoji[i]}</span>
+    <span class="top-name">${e.name} <span style="font-size:10px;color:var(--text-tertiary)">${e.classe}</span></span>
+    <span class="top-val irr">${e.bp}⭐ / ${e.rem}⚠️</span>
+  </div>`).join('') : '<p class="empty-state">Aucun élève avec les deux à la fois.</p>';
+
+  container.innerHTML = `
+    <div class="stats-section">
+      <div class="stats-section-title">🔴 Top remarques (cumulées)</div>
+      <div class="top-list">${listRem||'<p class="empty-state">—</p>'}</div>
+    </div>
+    <div class="stats-section">
+      <div class="stats-section-title">⭐ Top bons points (cumulés)</div>
+      <div class="top-list">${listBp||'<p class="empty-state">—</p>'}</div>
+    </div>
+    <div class="stats-section">
+      <div class="stats-section-title">⚠️ Profils irréguliers — bon travail mais comportement difficile</div>
+      <div class="top-list">${listIrr}</div>
+    </div>`;
+}
+
 </script>
 </body>
 </html>
