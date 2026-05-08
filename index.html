@@ -726,7 +726,7 @@ function closeModal(){document.getElementById('modalOverlay').classList.remove('
 function confirmRet(){if(pendingId!==null){allData[activeClass].find(x=>x.id===pendingId).rem=5;closeModal();saveClasse(activeClass);render();}}
 function resetRemarks(){
   archiveSnapshot(activeClass);
-  allData[activeClass].forEach(s=>{s.rem=0;s.bp=0;});
+  allData[activeClass].forEach(s=>{s.rem=0;s.bp=0;s.tetra=0;});
   saveClasse(activeClass);
   render();
 }
