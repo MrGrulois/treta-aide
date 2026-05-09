@@ -1,0 +1,25 @@
+{
+  "name": "TetraLink — Realtime Classroom",
+  "short_name": "TetraLink",
+  "description": "Gestion de classe en temps réel — Sainte Union de Kain",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1a18",
+  "theme_color": "#1a1a18",
+  "orientation": "portrait-primary",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "TETRALINK_LOGO-removebg-preview.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "TETRALINK_LOGO-removebg-preview.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
