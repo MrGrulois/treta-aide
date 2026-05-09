@@ -427,7 +427,7 @@ const EMAIL_DESTINATAIRE  = 'a3d.contact@gmail.com'; // email fixe du destinatai
 const PASSWORDS = {
   '1Ca':'1001','1Cb':'1002','1Cc':'1003','1Cd':'1004',
   '1De+2De':'1000','2CC':'2003','3TQS1':'3001','3TQS2':'3002',
-  '4EQAE1':'4001','4EQAE2':'4002','PROF':'Grulo1s'
+  '4EQAE1':'4001','4EQAE2':'4002','PROF':'Grulo1s','TEST1':'test1','TEST2':'test2'
 };
 
 const ALL_STUDENTS = {
@@ -441,9 +441,11 @@ const ALL_STUDENTS = {
   '3TQS2':['Altruy Tim','Amissi Sophya','Camblain Helena','Christiaens Noa','Crowin Zia','Delgutte Jaden','Delonville Elowane','Delpierre Orlan','Droin Cilou','Galliez Raphaël','Komsi Bernard','Lainez Célia','Mahy Selène','Meuris Brice','Montegnies Adriano','Rousseau Timéo','Stocman Nina','Van Caenenberg Louanne','Vangénéberg Ambre','Vion Dubois Mahe'],
   '4EQAE1':['Baisieux Milan','Bruni Erin','Callens Marie','Carette Enzo','Cheval Margaux','Debaisieux Anthéo','Delamballerie Kenza','Deroubaix Noé','Faignard Nélie','Huyghe Janelle','Lecomte Maxine','Leveau Elina','Meulemans Théo','Mulnard Clément','Schietse Arthur','Verhelst Ombeline'],
   '4EQAE2':['Blomme Noah','Debouvries Nathan','De Clerck Rachel','Deffrasnes Emeline','Desauvage Thalia','Detournay Evi','Ducoron Louna','Duhayon Suzon','Duplat Florian','Haidon Laura','Hanna Tsoline','Lecocq Gabin','Leroy Aline','Plowy Eliot','Vanryckeghem Victor','Verrijdt Elia'],
+'TEST1': ['Élève 1','Élève 2','Élève 3','Élève 4','Élève 5','Élève 6','Élève 7','Élève 8','Élève 9','Élève 10','Élève 11','Élève 12','Élève 13','Élève 14','Élève 15','Élève 16','Élève 17','Élève 18','Élève 19','Élève 20','Élève 21','Élève 22','Élève 23','Élève 24','Élève 25'],
+'TEST2': ['Élève 1','Élève 2','Élève 3','Élève 4','Élève 5','Élève 6','Élève 7','Élève 8','Élève 9','Élève 10','Élève 11','Élève 12','Élève 13','Élève 14','Élève 15','Élève 16','Élève 17','Élève 18','Élève 19','Élève 20','Élève 21','Élève 22','Élève 23','Élève 24','Élève 25'],
 };
 
-const CLASSE_LABELS = {'1Ca':'1Ca','1Cb':'1Cb','1Cc':'1Cc','1Cd':'1Cd','1De+2De':'1De+2De','2CC':'2Cc','3TQS1':'3Tqs1','3TQS2':'3Tqs2','4EQAE1':'4EQAE1','4EQAE2':'4EQAE2'};
+const CLASSE_LABELS = {'1Ca':'1Ca','1Cb':'1Cb','1Cc':'1Cc','1Cd':'1Cd','1De+2De':'1De+2De','2CC':'2Cc','3TQS1':'3Tqs1','3TQS2':'3Tqs2','4EQAE1':'4EQAE1','4EQAE2':'4EQAE2','TEST1':'Classe test 1','TEST2':'Classe test 2'};
 const ALL_CLASSES = Object.keys(ALL_STUDENTS);
 
 const tetraColors=['#B4B2A9','#639922','#BA7517','#D85A30','#185FA5'];
@@ -520,7 +522,7 @@ function saveClasse(c){
 
 const PROFS = [
   { id: 'grulois', name: 'Grulois Michael', password: 'Grulo1s',
-    classes: ['1Ca','1Cb','1Cc','1Cd','1De+2De','2CC','3TQS1','3TQS2','4EQAE1','4EQAE2'] }
+    classes: ['1Ca','1Cb','1Cc','1Cd','1De+2De','2CC','3TQS1','3TQS2','4EQAE1','4EQAE2','TEST1','TEST2'] }
 ];
 
 function setLoginView(html){
