@@ -479,7 +479,7 @@ const tetraDescs=['','Je travaille, tout va bien.','J\'ai une question, j\'essai
 const tetraActiveBg=['','#EAF3DE','#FAEEDA','#FAECE7','#E6F1FB'];
 const tetraActiveBorder=['','#3B6D11','#854F0B','#993C1D','#0C447C'];
 
-let currentRole=null, currentClasse=null, currentEleveName=null, activeClass=null, pendingId=null;
+let currentRole=null, currentClasse=null, currentEleveName=null, activeClass=null, pendingId=null, currentProfId=null;
 let allData={};
 let emailPayload=null;
 let showRemarques=true;
@@ -655,6 +655,7 @@ function confirmProfCode(profId){
   const btns = prof.classes.map(c =>
     `<button class="pick-btn" onclick="selectProfClass('${c}')">${CLASSE_LABELS[c]||c}</button>`
   ).join('');
+  currentProfId = profId;
   setLoginView(`
     <div class="onboard-box">
       <h2>Bonjour, ${prof.name.split(' ')[0]} 👋</h2>
@@ -721,7 +722,7 @@ function startApp(){
 }
 
 function doLogout(){
-  currentRole=null;currentClasse=null;currentEleveName=null;activeClass=null;allData={};
+  currentRole=null;currentClasse=null;currentEleveName=null;activeClass=null;allData={};currentProfId=null;
   document.getElementById('mainView').style.display='none';
   document.getElementById('loginView').style.display='';
   showRoleTiles();
