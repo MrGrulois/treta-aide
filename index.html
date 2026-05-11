@@ -1196,7 +1196,9 @@ function showStatTab(tab){
 // ── Tab évolution d'un élève ──────────────────────────────────────────────
 function renderEvolTab(container){
   // Construire liste de tous les élèves (depuis allData)
-  const opts = ALL_CLASSES.flatMap(c =>
+  const prof = PROFS.find(p=>p.id===currentProfId);
+  const profClasses = prof ? prof.classes : ALL_CLASSES;
+  const opts = profClasses.flatMap(c =>
     (allData[c]||[]).map(s => `<option value="${c}|||${s.name}">${s.name} (${CLASSE_LABELS[c]||c})</option>`)
   ).join('');
 
@@ -1273,7 +1275,9 @@ function renderEvolChart(){
 
 // ── Tab comparaison classes ───────────────────────────────────────────────
 function renderCompTab(container){
-  const data = ALL_CLASSES.map(c => {
+  const prof2 = PROFS.find(p=>p.id===currentProfId);
+  const profClasses2 = prof2 ? prof2.classes : ALL_CLASSES;
+  const data = profClasses2.map(c => {
     const classeHisto = statsHistorique[c] || {};
     const sessions = Object.values(classeHisto);
     let totalRem=0, totalBp=0, nbSessions=sessions.length;
@@ -1323,7 +1327,9 @@ function renderCompTab(container){
 function renderTopTab(container){
   // Agréger tous les élèves toutes classes confondues
   const map = {}; // key = "Nom|||Classe"
-  ALL_CLASSES.forEach(c => {
+  const prof3 = PROFS.find(p=>p.id===currentProfId);
+  const profClasses3 = prof3 ? prof3.classes : ALL_CLASSES;
+  profClasses3.forEach(c => {
     const classeHisto = statsHistorique[c] || {};
     Object.values(classeHisto).forEach(snap => {
       Object.values(snap).forEach(e => {
