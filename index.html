@@ -545,11 +545,11 @@ function saveClasse(c){
 // ═══════════════════════════════
 
 const PROFS = [
-  { id: 'grulois', name: 'Grulois Michael', password: 'Grulo1s',
+  { id: 'grulois', name: 'Grulois Michael', password: 'Grulo1s', email: 'a3d.contact@gmail.com',
     classes: ['1Ca','1Cb','1Cc','1Cd','1De+2De','2CC','3TQS1','3TQS2','4EQAE1','4EQAE2','TEST1','TEST2'] },
-  { id: 'proftest', name: 'Prof Test', password: 'proftest',
+  { id: 'proftest', name: 'Prof Test', password: 'proftest', email: 'a3d.contact@gmail.com',
     classes: ['1Ca','1Cb','1Cc','1Cd'] },
-  { id: 'aydin', name: 'Aydin Selin', password: 'Sel1n',
+  { id: 'aydin', name: 'Aydin Selin', password: 'Sel1n', email: 'selinaydin1994@gmail.com',
     classes: ['1Ca','1Cd','2CA','2CD','1De+2De'] }
 ];
 
@@ -864,7 +864,7 @@ function openEmailFromMotifs(){
   const corps=`Classe : ${classe}\nDate : ${dateStr} à ${heureStr}\n\nÉlèves nécessitant une intervention :\n\n${lignes}\n\n${'─'.repeat(40)}\nSTATISTIQUES COMPLÈTES DE LA CLASSE (format CSV)\nÀ copier dans Excel :\n\n${csvBlock}\n\nEnvoyé depuis TetraLink — Sainte Union de Kain`;
 
   emailPayload={
-    to_email: EMAIL_DESTINATAIRE,
+    to_email: PROFS.find(p=>p.id===currentProfId)?.email || EMAIL_DESTINATAIRE,
     subject: `[TetraLink] Rapport — ${classe} — ${dateStr}`,
     message: corps,
     classe: classe,
