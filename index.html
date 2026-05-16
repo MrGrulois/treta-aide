@@ -682,9 +682,14 @@ function confirmEleveCode(){
 }
 
 function showProfList(){
-  const btns = PROFS.map(p =>
-    `<button class="pick-btn pick-prof" onclick="showProfCode('${p.id}')">${p.name}</button>`
-  ).join('');
+  const isAdmin = (currentProfId === 'grulois');
+  const btns = PROFS.map(p => {
+    const resetBtn = isAdmin ? `<button class="btn-reset-pwd" onclick="event.stopPropagation();resetProfPwd('${p.id}')" title="Réinitialiser le mot de passe de ${p.name}">🔑</button>` : '';
+    return `<div style="display:flex;align-items:center;gap:6px;">
+      <button class="pick-btn pick-prof" style="flex:1" onclick="showProfCode('${p.id}')">${p.name}</button>
+      ${resetBtn}
+    </div>`;
+  }).join('');
   setLoginView(`
     <div class="onboard-box">
       <button class="btn-back" onclick="showRoleTiles()">← Retour</button>
@@ -695,30 +700,90 @@ function showProfList(){
 }
 
 function showProfCode(profId){
+  // Vérifier dans Firebase si le prof a déjà un mot de passe
   setLoginView(`
     <div class="onboard-box">
       <button class="btn-back" onclick="showProfList()">← Retour</button>
-      <h2>Code professeur</h2>
-      <p class="onboard-sub">Entrez votre code d'accès</p>
-      <div id="loginError" class="login-error">Code incorrect, réessaie.</div>
+      <h2>Chargement…</h2>
+      <p class="onboard-sub">Vérification en cours…</p>
+    </div>`);
+  window.firebaseRef(window.firebaseDB, 'profPasswords/' + profId).once('value', snap => {
+    const hash = snap.val();
+    if(!hash){ showProfCreatePassword(profId); }
+    else { showProfEnterPassword(profId); }
+  }).catch(()=>{ showProfEnterPassword(profId); });
+}
+
+function showProfCreatePassword(profId){
+  const prof = PROFS.find(p=>p.id===profId);
+  const nom = prof ? prof.name.split(' ')[0] : '';
+  setLoginView(`
+    <div class="onboard-box">
+      <button class="btn-back" onclick="showProfList()">← Retour</button>
+      <h2>Créez votre mot de passe</h2>
+      <p class="onboard-sub">Bienvenue <strong>${nom}</strong> ! Première connexion.<br>Choisissez un mot de passe de <strong>6 caractères minimum</strong>.</p>
+      <div id="loginError" class="login-error"></div>
       <div class="code-input-wrap">
-        <input type="password" id="profCodeInput" placeholder="••••" autocomplete="off"
+        <input type="password" id="profPwd1" placeholder="Nouveau mot de passe" autocomplete="new-password" style="letter-spacing:2px"
+          onkeydown="if(event.key==='Enter')document.getElementById('profPwd2').focus()">
+        <input type="password" id="profPwd2" placeholder="Confirmez le mot de passe" autocomplete="new-password" style="letter-spacing:2px;margin-top:8px"
+          onkeydown="if(event.key==='Enter')confirmProfCreatePassword('${profId}')">
+        <button onclick="confirmProfCreatePassword('${profId}')">Créer mon mot de passe</button>
+      </div>
+    </div>`);
+  setTimeout(()=>{ const el=document.getElementById('profPwd1'); if(el)el.focus(); },100);
+}
+
+function showProfEnterPassword(profId){
+  const prof = PROFS.find(p=>p.id===profId);
+  const nom = prof ? prof.name : '';
+  setLoginView(`
+    <div class="onboard-box">
+      <button class="btn-back" onclick="showProfList()">← Retour</button>
+      <h2>Mot de passe professeur</h2>
+      <p class="onboard-sub">Bonjour <strong>${nom}</strong></p>
+      <div id="loginError" class="login-error">Mot de passe incorrect, réessaie.</div>
+      <div class="code-input-wrap">
+        <input type="password" id="profCodeInput" placeholder="Votre mot de passe" autocomplete="current-password" style="letter-spacing:2px"
           onkeydown="if(event.key==='Enter')confirmProfCode('${profId}')">
-        <button onclick="confirmProfCode('${profId}')">Entrer</button>
+        <button onclick="confirmProfCode('${profId}')">Se connecter</button>
       </div>
     </div>`);
   setTimeout(()=>{ const el=document.getElementById('profCodeInput'); if(el)el.focus(); },100);
 }
 
+function confirmProfCreatePassword(profId){
+  const p1 = (document.getElementById('profPwd1')||{}).value||'';
+  const p2 = (document.getElementById('profPwd2')||{}).value||'';
+  const err = document.getElementById('loginError');
+  if(p1.length < 6){
+    err.style.display='block'; err.textContent='Le mot de passe doit faire au moins 6 caractères.'; return;
+  }
+  if(p1 !== p2){
+    err.style.display='block'; err.textContent='Les deux mots de passe ne correspondent pas.'; return;
+  }
+  const hash = simpleHash(p1);
+  window.firebaseRef(window.firebaseDB, 'profPasswords/' + profId).set(hash)
+    .then(()=>{ showProfClasses(profId); })
+    .catch(()=>{ err.style.display='block'; err.textContent='Erreur de connexion, réessaie.'; });
+}
+
 function confirmProfCode(profId){
-  const prof = PROFS.find(p=>p.id===profId);
   const val = (document.getElementById('profCodeInput')||{}).value||'';
   const err = document.getElementById('loginError');
-  if(!prof || val !== prof.password){
-    if(err){ err.style.display='block'; err.textContent='Code incorrect, réessaie.'; }
-    return;
-  }
-  // Code OK — montrer les classes du prof en boutons
+  window.firebaseRef(window.firebaseDB, 'profPasswords/' + profId).once('value', snap => {
+    const hash = snap.val();
+    if(!hash || simpleHash(val) !== hash){
+      if(err){ err.style.display='block'; }
+    } else {
+      showProfClasses(profId);
+    }
+  }).catch(()=>{ if(err){ err.style.display='block'; err.textContent='Erreur réseau, réessaie.'; } });
+}
+
+function showProfClasses(profId){
+  const prof = PROFS.find(p=>p.id===profId);
+  if(!prof) return;
   const btns = prof.classes.map(c =>
     `<button class="pick-btn" onclick="selectProfClass('${c}')">${CLASSE_LABELS[c]||c}</button>`
   ).join('');
@@ -853,11 +918,19 @@ function resetToOk(id){const s=allData[activeClass].find(x=>x.id===id);if(s){s.t
 function resetElevePwd(btn){
   const name = btn.getAttribute('data-name');
   const classe = btn.getAttribute('data-classe');
-  if(!confirm('Reinitialiser le mot de passe de '+name+' ?
-L eleve devra en creer un nouveau a sa prochaine connexion.')) return;
+  if(!confirm('Reinitialiser le mot de passe de '+name+' ? L eleve devra en creer un nouveau a sa prochaine connexion.')) return;
   const safeKey = name.replace(/[^a-zA-Z0-9]/g,'_');
   window.firebaseRef(window.firebaseDB,'passwords/'+classe+'/'+safeKey).remove()
     .then(()=>{ setSyncStatus('Mot de passe reinitialise pour '+name,'sent'); setTimeout(()=>setSyncStatus('',''),3000); })
+    .catch(()=>{ setSyncStatus('Erreur lors de la reinitialisation','error'); });
+}
+
+function resetProfPwd(profId){
+  const prof = PROFS.find(p=>p.id===profId);
+  const nom = prof ? prof.name : profId;
+  if(!confirm('Reinitialiser le mot de passe de '+nom+' ? Il devra en creer un nouveau a sa prochaine connexion.')) return;
+  window.firebaseRef(window.firebaseDB,'profPasswords/'+profId).remove()
+    .then(()=>{ setSyncStatus('Mot de passe reinitialise pour '+nom,'sent'); setTimeout(()=>setSyncStatus('',''),3000); })
     .catch(()=>{ setSyncStatus('Erreur lors de la reinitialisation','error'); });
 }
 
