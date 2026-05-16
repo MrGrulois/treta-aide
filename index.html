@@ -183,6 +183,8 @@
   .btn-ret:hover { background: #F7C1C1; }
   .btn-reset-ok { font-size: 10px; padding: 5px 7px; border-radius: var(--radius-md); border: 0.5px solid #3B6D11; background: #EAF3DE; color: #3B6D11; cursor: pointer; font-weight: 500; flex-shrink: 0; font-family: inherit; touch-action: manipulation; }
   .btn-reset-ok:hover { background: #C0DD97; }
+  .btn-reset-pwd { font-size: 13px; padding: 4px 7px; border-radius: var(--radius-md); border: 0.5px solid #888; background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; flex-shrink: 0; font-family: inherit; touch-action: manipulation; }
+  .btn-reset-pwd:hover { background: var(--bg-tertiary); }
 
   /* Compat ancien .stu-bottom si utilisé ailleurs */
   .stu-bottom { display: flex; align-items: center; gap: 6px; }
@@ -587,31 +589,96 @@ function showEleveNames(classe){
 
 function selectEleveName(name){
   currentEleveName = name;
-  // Demander le code de la classe avant de lancer l'app
+  // Vérifier dans Firebase si l'élève a déjà un mot de passe
   setLoginView(`
     <div class="onboard-box">
       <button class="btn-back" onclick="showEleveNames('${currentClasse}')">← Retour</button>
-      <h2>Code de la classe</h2>
-      <p class="onboard-sub">Connecté·e en tant que <strong>${name}</strong> — ${CLASSE_LABELS[currentClasse]||currentClasse}</p>
-      <div id="loginError" class="login-error">Code incorrect, réessaie.</div>
+      <h2>Chargement…</h2>
+      <p class="onboard-sub">Vérification en cours…</p>
+    </div>`);
+  const safeKey = name.replace(/[^a-zA-Z0-9]/g,'_');
+  window.firebaseRef(window.firebaseDB, `passwords/${currentClasse}/${safeKey}`).once('value', snap => {
+    const hash = snap.val();
+    if(!hash){
+      showEleveCreatePassword(name);
+    } else {
+      showEleveEnterPassword(name);
+    }
+  }).catch(()=>{ showEleveEnterPassword(name); });
+}
+
+function showEleveCreatePassword(name){
+  const classeEsc = currentClasse.replace(/'/g,"\\'");
+  setLoginView(`
+    <div class="onboard-box">
+      <button class="btn-back" onclick="showEleveNames('${classeEsc}')">← Retour</button>
+      <h2>Crée ton mot de passe</h2>
+      <p class="onboard-sub">Bienvenue <strong>${name}</strong> ! C'est ta première connexion.<br>Choisis un mot de passe de <strong>6 caractères minimum</strong> et note-le dans ton journal de classe.</p>
+      <div id="loginError" class="login-error"></div>
       <div class="code-input-wrap">
-        <input type="password" id="eleveCodeInput" placeholder="••••" autocomplete="off"
+        <input type="password" id="elevePwd1" placeholder="Nouveau mot de passe" autocomplete="new-password" style="letter-spacing:2px"
+          onkeydown="if(event.key==='Enter')document.getElementById('elevePwd2').focus()">
+        <input type="password" id="elevePwd2" placeholder="Confirme le mot de passe" autocomplete="new-password" style="letter-spacing:2px;margin-top:8px"
+          onkeydown="if(event.key==='Enter')confirmCreatePassword()">
+        <button onclick="confirmCreatePassword()">Créer mon mot de passe</button>
+      </div>
+    </div>`);
+  setTimeout(()=>{ const el=document.getElementById('elevePwd1'); if(el)el.focus(); },100);
+}
+
+function showEleveEnterPassword(name){
+  const classeEsc = currentClasse.replace(/'/g,"\\'");
+  setLoginView(`
+    <div class="onboard-box">
+      <button class="btn-back" onclick="showEleveNames('${classeEsc}')">← Retour</button>
+      <h2>Mot de passe</h2>
+      <p class="onboard-sub">Connecté·e en tant que <strong>${name}</strong> — ${CLASSE_LABELS[currentClasse]||currentClasse}</p>
+      <div id="loginError" class="login-error">Mot de passe incorrect, réessaie.</div>
+      <div class="code-input-wrap">
+        <input type="password" id="eleveCodeInput" placeholder="Ton mot de passe" autocomplete="current-password" style="letter-spacing:2px"
           onkeydown="if(event.key==='Enter')confirmEleveCode()">
-        <button onclick="confirmEleveCode()">Entrer</button>
+        <button onclick="confirmEleveCode()">Se connecter</button>
       </div>
     </div>`);
   setTimeout(()=>{ const el=document.getElementById('eleveCodeInput'); if(el)el.focus(); },100);
 }
 
+// Hash simple (non cryptographique) — suffisant pour un usage scolaire
+function simpleHash(str){
+  let h = 5381;
+  for(let i=0;i<str.length;i++) h = ((h<<5)+h)^str.charCodeAt(i);
+  return (h>>>0).toString(36);
+}
+
+function confirmCreatePassword(){
+  const p1 = (document.getElementById('elevePwd1')||{}).value||'';
+  const p2 = (document.getElementById('elevePwd2')||{}).value||'';
+  const err = document.getElementById('loginError');
+  if(p1.length < 6){
+    err.style.display='block'; err.textContent='Le mot de passe doit faire au moins 6 caractères.'; return;
+  }
+  if(p1 !== p2){
+    err.style.display='block'; err.textContent='Les deux mots de passe ne correspondent pas.'; return;
+  }
+  const safeKey = currentEleveName.replace(/[^a-zA-Z0-9]/g,'_');
+  const hash = simpleHash(p1);
+  window.firebaseRef(window.firebaseDB, `passwords/${currentClasse}/${safeKey}`).set(hash)
+    .then(()=>{ currentRole='eleve'; startApp(); })
+    .catch(()=>{ err.style.display='block'; err.textContent='Erreur de connexion, réessaie.'; });
+}
+
 function confirmEleveCode(){
   const val = (document.getElementById('eleveCodeInput')||{}).value||'';
   const err = document.getElementById('loginError');
-  if(PASSWORDS[currentClasse] !== val){
-    if(err){ err.style.display='block'; err.textContent='Code incorrect, réessaie.'; }
-    return;
-  }
-  currentRole = 'eleve';
-  startApp();
+  const safeKey = currentEleveName.replace(/[^a-zA-Z0-9]/g,'_');
+  window.firebaseRef(window.firebaseDB, `passwords/${currentClasse}/${safeKey}`).once('value', snap => {
+    const hash = snap.val();
+    if(!hash || simpleHash(val) !== hash){
+      if(err){ err.style.display='block'; }
+    } else {
+      currentRole='eleve'; startApp();
+    }
+  }).catch(()=>{ if(err){ err.style.display='block'; err.textContent='Erreur réseau, réessaie.'; } });
 }
 
 function showProfList(){
@@ -782,6 +849,17 @@ function archiveSnapshot(classe){
   setTimeout(()=>setSyncStatus('',''), 3000);
 }
 function resetToOk(id){const s=allData[activeClass].find(x=>x.id===id);if(s){s.tetra=1;saveClasse(activeClass);render();}}
+
+function resetElevePwd(btn){
+  const name = btn.getAttribute('data-name');
+  const classe = btn.getAttribute('data-classe');
+  if(!confirm('Reinitialiser le mot de passe de '+name+' ?
+L eleve devra en creer un nouveau a sa prochaine connexion.')) return;
+  const safeKey = name.replace(/[^a-zA-Z0-9]/g,'_');
+  window.firebaseRef(window.firebaseDB,'passwords/'+classe+'/'+safeKey).remove()
+    .then(()=>{ setSyncStatus('Mot de passe reinitialise pour '+name,'sent'); setTimeout(()=>setSyncStatus('',''),3000); })
+    .catch(()=>{ setSyncStatus('Erreur lors de la reinitialisation','error'); });
+}
 
 const MOTIFS = [
   'Parle au cours',
@@ -1033,6 +1111,8 @@ function renderProfGrid(){
     const label=tetraLabels[s.tetra]||'—';
     const retBtn=s.rem>=3?`<button class="btn-ret" onclick="openRet(${s.id})">Ret.</button>`:"";
     const resetBtn=`<button class="btn-reset-ok" onclick="resetToOk(${s.id})" title="Remettre en OK">✓ OK</button>`;
+    const safeN=s.name.replace(/'/g,"&apos;");
+    const resetPwdBtn=`<button class="btn-reset-pwd" onclick="resetElevePwd(this)" data-name="${safeN}" data-classe="${activeClass}" title="Réinitialiser le mot de passe">🔑</button>`;
     const bp=s.bp||0;
     const bpLit=bp>=3;
     const bpBadge=bp>0?`<span class="bp-badge${bpLit?' lit':''}">${bpLit?'✨':'⭐'} ${bp}</span>`:'';
@@ -1052,7 +1132,7 @@ function renderProfGrid(){
         <span class="rpill ${ri.cls}">${ri.label}</span>
       </div>
       <div class="stu-actions">
-        <div class="stu-actions-left">${resetBtn}${retBtn}</div>
+        <div class="stu-actions-left">${resetBtn}${retBtn}${resetPwdBtn}</div>
         <div class="stu-actions-right">
           <button class="btn-bp btn-bp-minus" onclick="subBp(${s.id})" title="Retirer un bon point" ${bp===0?'disabled style="opacity:0.3;cursor:default"':''}>−</button>
           <button class="btn-bp" onclick="addBp(${s.id})" title="Ajouter un bon point">⭐</button>
